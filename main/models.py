@@ -1,7 +1,37 @@
 
 from django.db import models
 from django.db.models.base import Model
-from Wsms.helpers import helper_functions
+from main.helpers import helper_functions
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+# from rest_framework.authtoken.models import Tokens
+from django.contrib.auth.models import AbstractUser
+from django.utils.translation import ugettext_lazy as _
+
+
+class User(AbstractUser):
+    username = models.CharField(blank=True, null=True, max_length=255)
+    email = models.EmailField(_('email address'), unique=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+
+    def __str__(self):
+        return "{}".format(self.email)
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    phone_no = models.PositiveIntegerField(unique=True)
+    email = models.EmailField(max_length=100, unique=True)
+    isemailverified = models.BooleanField(default=False)
+    joined_date = models.DateTimeField(auto_now_add=True)
+    password = models.CharField(max_length=50)
+
 
 # Create your models here.
 
