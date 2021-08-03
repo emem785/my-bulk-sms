@@ -6,31 +6,85 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 # from rest_framework.authtoken.models import Tokens
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import ugettext_lazy as _
 
 
-class User(AbstractUser):
+class CustomUserManager(BaseUserManager):
+    """
+    Custom user model manager where email is the unique identifiers
+    for authentication instead of usernames.
+    """
+
+    def create_user(self, email, username, password, first_name, last_name, phone_no, **other_fields):
+        """
+        Create and save a User with the given email and password.
+        """
+        if not email:
+            raise ValueError(_('The Email is required'))
+        email = self.normalize_email(email)
+        user = self.model(email=email, username=username, first_name=first_name,
+                          last_name=last_name, phone_no=phone_no, **other_fields)
+        user.set_password(password)
+        user.save()
+        return user
+
+    def create_superuser(self, email, username, password, first_name, last_name, phone_no, **other_fields):
+        """
+        Create and save a SuperUser with the given email and password.
+        """
+        other_fields.setdefault('is_staff', True)
+        other_fields.setdefault('is_superuser', True)
+        other_fields.setdefault('is_active', True)
+
+        if other_fields.get('is_staff') is not True:
+            raise ValueError(_('Superuser must have is_staff=True.'))
+        if other_fields.get('is_superuser') is not True:
+            raise ValueError(_('Superuser must have is_superuser=True.'))
+        return self.create_user(email, username, password, first_name, last_name, phone_no, **other_fields)
+
+
+class User(AbstractUser, PermissionsMixin):
     username = models.CharField(blank=True, null=True, max_length=255)
     email = models.EmailField(_('email address'), unique=True)
+    is_active = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    phone_no = models.PositiveIntegerField(unique=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_no', 'username']
+
+    objects = CustomUserManager()
 
     def __str__(self):
         return "{}".format(self.email)
 
 
-class UserProfile(models.Model):
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    phone_no = models.PositiveIntegerField(unique=True)
-    email = models.EmailField(max_length=100, unique=True)
-    isemailverified = models.BooleanField(default=False)
-    joined_date = models.DateTimeField(auto_now_add=True)
-    password = models.CharField(max_length=50)
+# class UserProfile(models.Model):
+#     user = models.OneToOneField(
+#         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
+#     first_name = models.CharField(max_length=100)
+#     last_name = models.CharField(max_length=100)
+#     phone_no = models.PositiveIntegerField(unique=True)
+#     email = models.EmailField(max_length=100, unique=True)
+#     isemailverified = models.BooleanField(default=False)
+#     joined_date = models.DateTimeField(auto_now_add=True)
+#     password = models.CharField(max_length=50)
+
+#     @staticmethod
+#     def create_new_user(user, first_name, last_name, email, phone_no, password):
+#         newUserProfile = UserProfile(
+#             user=user,
+#             first_name=first_name,
+#             last_name=last_name,
+#             email=email,
+#             phone_no=phone_no,
+#             password=password
+#         )
+#         newUserProfile.save()
+#         return newUserProfile
 
 
 # Create your models here.

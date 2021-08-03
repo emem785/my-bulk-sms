@@ -1,3 +1,4 @@
+from django.http.response import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -7,60 +8,89 @@ from .models import *
 from .serializers import *
 
 
-@api_view(['POST'])
-def create_customer(request):
-    if request.method == 'POST':
+# @api_view(['POST'])
+# def create_user(request):
+# if request.method == 'POST':
+#     cusUserSerializer = CustomUserSerializer(data=request.data)
 
-        serializer = CustomerSerializer(data=request.data)
+#     if cusUserSerializer.is_valid():
+#         phone = request.data["profile"]["phone_no"]
 
-        if serializer.is_valid():
-            useremail = serializer.validated_data.get('email')
-            customer_queryset = Customer.objects.filter(email=useremail)
+#         exist = UserProfile.objects.exists()
+#         if exist:
+#             return JsonResponse({"msg": "user with this phone exists"})
 
-            if customer_queryset.exists():
-                message = {
-                    "status": "Sorry email already exist, please try another email"
-                }
-                print("[[[[[[[[[[[[[[[[[[[[[")
-                print('..................')
-                print(message)
+#         cusUser = cusUserSerializer.save()
 
-                return Response(data=message, status=HTTP_201_CREATED)
+#         return Response(cusUserSerializer.data)
 
-            else:
-                serializer.save()
-                message = {
-                    "status": "Success"
-                }
-                print("[[[[[[[[[[[[[[[[[[[[[")
-                print('..................')
-                print(message)
+#     return Response(cusUserSerializer.errors)
 
-                return Response(data=message, status=HTTP_201_CREATED)
+# userSerializer = UserSerializer(data=request.data)
 
-        else:
-            return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
+# serializer = UserProfileSerializer(data=request.data)
 
-    # elif request.method == 'GET':
-    #     customer = Customer.objects.all()
-    #     serializer = CustomerSerializer(customer, many=True)
-    #     return Response(serializer.data)
+# if userSerializer.is_valid():
+#     userSerializer.save()
+#     print('>>>>>>>>>>>>>')
+#     print(userSerializer)
+#     profile = request.data
+#     userProfile = profile.add(user=userSerializer)
+#     seriliazedUserProfile = UserProfileSerializer(data=userProfile)
+#     print('<<<<<<<<<<<')
+#     print(seriliazedUserProfile)
+#     if seriliazedUserProfile.is_valid():
+#         seriliazedUserProfile.save()
+
+# userEmail = serializer.validated_data.get('email')
+# userPassword = serializer.validated_data.get('password')
+# user_queryset = UserProfile.objects.filter(email=userEmail)
+
+# if user_queryset.exists():
+#     message = {
+#         "status": "Sorry email already exist, please try another email"
+#     }
+#     print("[[[[[[[[[[[[[[[[[[[[[")
+#     print('..................')
+#     print(message)
+
+#     return Response(data=message, status=HTTP_201_CREATED)
+
+# else:
+#     serializer.save()
+
+#     message = {
+#         "status": "Success"
+#     }
+#     print("[[[[[[[[[[[[[[[[[[[[[")
+#     print('..................')
+#     print(message)
+
+#     return Response(data=message, status=HTTP_201_CREATED)
+
+# else:
+#     return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+# elif request.method == 'GET':
+#     customer = Customer.objects.all()
+#     serializer = CustomerSerializer(customer, many=True)
+#     return Response(serializer.data)
 
 
 @api_view(['GET', 'PUT'])
-def customer_detail(request, pk, format=None):
+def user_detail(request, pk, format=None):
 
     try:
-        customer = Customer.objects.get(pk=pk)
-    except Customer.DoesNotExist:
+        user = UserProfile.objects.get(pk=pk)
+    except UserProfile.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = CustomerSerializer(customer)
+        serializer = UserProfileSerializer(user)
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = CustomerSerializer(customer, data=request.data)
+        serializer = UserProfileSerializer(user, data=request.data)
         if serializer.is_valid():
 
             serializer.save()

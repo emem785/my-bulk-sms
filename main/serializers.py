@@ -1,13 +1,16 @@
 from django.db import models
 from django.utils import translation
 from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 from main.models import *
 
 
-class CustomerSerializer(ModelSerializer):
+class UserSerializer(ModelSerializer):
+
     class Meta:
-        model = Customer
-        fields = '__all__'
+        model = User
+        fields = ['id', 'email', 'username', 'first_name',
+                  'last_name', 'phone_no', 'joined_date']
 
 
 class MessageSerializer(ModelSerializer):
