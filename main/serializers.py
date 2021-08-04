@@ -1,9 +1,21 @@
+from djoser.email import ActivationEmail
 from django.db import models
 from django.utils import translation
 from rest_framework.fields import EmailField
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from main.models import *
+from djoser.serializers import UserCreateSerializer
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+
+class UserCreateSerializer(UserCreateSerializer):
+
+    class Meta(UserCreateSerializer.Meta):
+        model = User
+        fields = '__all__'
 
 
 class UserSerializer(ModelSerializer):
