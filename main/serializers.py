@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import translation
+from rest_framework.fields import EmailField
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from main.models import *
@@ -9,8 +10,20 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'first_name',
-                  'last_name', 'phone_no', 'joined_date']
+        fields = ['email', 'first_name',
+                  'last_name', 'phone_no', 'username', 'password']
+
+    def save(self, request):
+        user = User(
+            email=request.data['email'],
+            username=request.data['username'],
+            phone_no=request.data['phone_no'],
+            first_name=request.data['first_name'],
+            last_name=request.data['last_name'],
+        )
+        user.set_password(request.data['password'])
+        user.save()
+        return user
 
 
 class MessageSerializer(ModelSerializer):
