@@ -18,7 +18,7 @@ from django.urls import path, include
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions  # new
-from main.views import ActivateUser 
+from main.views import activate_email
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -35,11 +35,11 @@ schema_view = get_schema_view(
 
 urlpatterns = [
 
-    path('activate/', ActivateUser.as_view(), name='activate'),
+    path('activate/', activate_email, name='activate'),
     path('whisper/', include('main.urls')),
     path('admin/', admin.site.urls),
     path('auth/', include('djoser.urls')),
-    path('auth/', include('djoser.urls.jwt')),
+    path('auth/', include('djoser.urls.authtoken')),
     path('', schema_view.with_ui('swagger', cache_timeout=0),
          name='schema-swagger-ui'),
 ]

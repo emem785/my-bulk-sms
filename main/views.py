@@ -10,23 +10,26 @@ from rest_framework.generics import GenericAPIView
 import requests
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
-
-class ActivateUser(GenericAPIView):
-
-	def get(self,request):
-		uid = request.GET.get('uid')
-		token = request.GET.get('token')
-		payload = {'uid': uid, 'token': token}
-		print(token)
+from django.shortcuts import render
 
 
-		url = "http://localhost:8000/auth/users/activation/"
-		response = requests.post(url, data = payload)
 
-		if response.status_code == 204:
-			return Response({}, response.status_code)
-		else:
-			return Response(response.json())
+def activate_email(request):
+
+    if request.method == "GET":
+        uid = request.GET.get('uid')
+        token = request.GET.get('token')
+        payload = {'uid': uid, 'token': token}
+        print(token)
+        
+
+        url = "http://localhost:8000/auth/users/activation/"
+        response = requests.post(url, data = payload)
+
+
+        # if response.status_code == 204:
+        return render(request, "redirect.html")
+        
 
     
 @api_view(['POST', 'GET'])
@@ -64,13 +67,12 @@ def create_message(request):
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
 
+# TODO here is the code I was talking about 
     elif request.method == 'GET':
         header  = request.headers['Authorization']
         token = header.split(" ")[1]
-        print(token)
         user = Token.objects.get(key=token).user
-        print(user.email)
-        message = Message.objects.all()
+        message = Message.objects.filter(user=user)
         serializer = MessageSerializer(message, many=True)
         return Response(serializer.data)
 

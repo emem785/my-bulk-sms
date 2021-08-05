@@ -23,7 +23,7 @@ class UserCreateSerializer(UserCreateSerializer):
 class MessageSerializer(ModelSerializer):
     class Meta:
         model = Message
-        fields = '__all__'
+        fields = ['content','sender_name']
 
 
 class GroupSerializer(ModelSerializer):

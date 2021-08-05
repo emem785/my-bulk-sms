@@ -7,7 +7,6 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 
 admin.site.register(Contact)
-admin.site.register(Customer)
 admin.site.register(User)
 admin.site.register(Message)
 admin.site.register(Transaction)

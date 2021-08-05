@@ -90,23 +90,18 @@ AUTH_USER_MODEL = 'main.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ),
 }
 
-SIMPLE_JWT = {
-   'AUTH_HEADER_TYPES': ('JWT',),
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
-    'REFRESH_TOKEN_LIFETIME': timedelta(weeks=12),
-}
 
-#TODO use your details here
+# TODO add your gmail details here
 SITE_ID = 3
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER= 'insert your email address'
-EMAIL_HOST_PASSWORD='insert your password'
+EMAIL_HOST_USER= 'add your email here'
+EMAIL_HOST_PASSWORD='add your password here'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 
@@ -184,6 +179,7 @@ DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
     'USERNAME_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
     'ACTIVATION_URL' : 'activate/?uid={uid}&token={token}',
+    'TOKEN_MODEL':'rest_framework.authtoken.models.Token',
     'SERIALIZERS':{
         'user_create': 'main.serializers.UserCreateSerializer',
         'user': 'main.serializers.UserCreateSerializer',
