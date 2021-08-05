@@ -13,12 +13,33 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib.admin.sites import site
 from django.contrib import admin
 from django.urls import path, include
-from django.conf.urls import url
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions  # new
+from main.views import ActivateUser 
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="EDM API",
+        default_version="v1",
+        description="Test API",
+        terms_of_service="",
+        contact=openapi.Contact(email="desmond@getmobile.tech"),
+        license=openapi.License(name="MIT License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+
+    path('activate/', ActivateUser.as_view(), name='activate'),
     path('whisper/', include('main.urls')),
+    path('admin/', admin.site.urls),
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),
+    path('', schema_view.with_ui('swagger', cache_timeout=0),
+         name='schema-swagger-ui'),
 ]

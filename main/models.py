@@ -1,13 +1,8 @@
 
 from django.db import models
-from django.db.models.base import Model
-from main.helpers import helper_functions
-from django.conf import settings
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils.translation import ugettext_lazy as _
-from .manager import UserManager
+from main.manager import UserManager
 
 
 
@@ -25,7 +20,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name','password', 'phone','first_name','last_name']
+    REQUIRED_FIELDS = ['first_name','last_name','phone']
 
     class Meta:
         verbose_name = _('user')
