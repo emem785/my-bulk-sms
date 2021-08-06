@@ -25,6 +25,7 @@ def activate_email(request):
 
         url = "http://emme785.pythonanywhere.com/auth/users/activation/"
         response = requests.post(url, data = payload)
+        print(response.json)
 
 
         # if response.status_code == 204:
