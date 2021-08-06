@@ -96,7 +96,7 @@ REST_FRAMEWORK = {
 
 
 # TODO add your gmail details here
-SITE_ID = 3
+SITE_ID = 4
 EMAIL_HOST = 'smtp.gmail.com'
 # EMAIL_HOST = 'smtp.mailgun.org'
 EMAIL_PORT = 587
