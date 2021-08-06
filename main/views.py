@@ -19,16 +19,12 @@ def activate_email(request):
     if request.method == "GET":
         uid = request.GET.get('uid')
         token = request.GET.get('token')
-        payload = {'uid': uid, 'token': token}
-        print(token)
-        
+        protocol = 'https://' if request.is_secure() else 'http://'
+        web_url = protocol + request.get_host()
+        post_url = web_url + "/auth/users/activate/"
+        post_data = {'uid': uid, 'token': token}
+        result = requests.post(post_url, data = post_data)
 
-        url = "http://emme785.pythonanywhere.com/auth/users/activation/"
-        response = requests.post(url, data = payload)
-        print(response.json)
-
-
-        # if response.status_code == 204:
         return render(request, "redirect.html")
         
 
