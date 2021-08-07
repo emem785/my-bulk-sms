@@ -1,3 +1,5 @@
+import json
+
 import requests
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -21,14 +23,38 @@ def activate_email(request):
         token = request.GET.get('token')
         protocol = 'https://' if request.is_secure() else 'http://'
         web_url = protocol + request.get_host()
-        post_url = web_url + "/auth/users/activate/"
+        post_url = web_url + "/auth/users/activation/"
         post_data = {'uid': uid, 'token': token}
-        result = requests.post(post_url, data = post_data)
+        print(post_data)
+        print(post_url)
+        result = requests.post(post_url, json=post_data, headers={
+                               "content-type": "application/json"})
 
         return render(request, "redirect.html")
-        
 
-    
+
+def reset_password(request):
+
+    if request.method == "GET":
+        uid = request.GET.get('uid')
+        token = request.GET.get('token')
+        context = {"uid": uid, "token": token}
+        return render(request, "reset_password.html", context=context)
+
+    password = request.POST.get('password')
+    uid = request.POST.get('uid')
+    token = request.POST.get('token')
+    protocol = 'https://' if request.is_secure() else 'http://'
+    web_url = protocol + request.get_host()
+    post_url = web_url + "/auth/users/reset_password_confirm/"
+    post_data = {'uid': uid, 'token': token, 'new_password': password}
+    print(post_data)
+    result = requests.post(post_url, json=post_data, headers={
+                               "content-type": "application/json"})
+
+    return JsonResponse({"msg": "success"})
+
+
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def create_message(request):
@@ -64,9 +90,9 @@ def create_message(request):
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-# TODO here is the code I was talking about 
+# TODO here is the code I was talking about
     elif request.method == 'GET':
-        header  = request.headers['Authorization']
+        header = request.headers['Authorization']
         token = header.split(" ")[1]
         user = Token.objects.get(key=token).user
         message = Message.objects.filter(user=user)

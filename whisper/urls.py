@@ -14,11 +14,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include, path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
+from main.views import activate_email, reset_password
 from rest_framework import permissions  # new
-from main.views import activate_email
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -36,6 +36,7 @@ schema_view = get_schema_view(
 urlpatterns = [
 
     path('activate/', activate_email, name='activate'),
+    path('password/reset/confirm/', reset_password, name='reset_password'),
     path('whisper/', include('main.urls')),
     path('admin/', admin.site.urls),
     path('auth/', include('djoser.urls')),

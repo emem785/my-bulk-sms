@@ -179,7 +179,7 @@ DJOSER = {
     'PASSWORD_CHANGED_EMAIL_CONFIRMATION':True,
     'SEND_ACTIVATION_EMAIL':True,
     'SEND_CONFIRMATION_EMAIL':True,
-    'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
+    'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/?uid={uid}&token={token}',
     'USERNAME_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
     'ACTIVATION_URL' : 'activate/?uid={uid}&token={token}',
     'TOKEN_MODEL':'rest_framework.authtoken.models.Token',
