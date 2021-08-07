@@ -17,6 +17,9 @@ from .models import *
 from .serializers import *
 
 
+def test_view(request):
+        return render(request, "redirect.html")
+
 def activate_email(request):
 
     if request.method == "GET":
