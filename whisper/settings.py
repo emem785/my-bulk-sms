@@ -16,6 +16,8 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import django_heroku
+
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -195,3 +197,4 @@ DJOSER = {
     
 }
 
+django_heroku.settings(locals())
