@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import (HTTP_201_CREATED, HTTP_400_BAD_REQUEST,
                                    HTTP_405_METHOD_NOT_ALLOWED)
+from whisper.settings import logger
 
 from .models import *
 from .serializers import *
@@ -25,12 +26,12 @@ def activate_email(request):
         web_url = protocol + request.get_host()
         post_url = web_url + "/auth/users/activation/"
         post_data = {'uid': uid, 'token': token}
-        print(post_data)
-        print(post_url)
         result = requests.post(post_url, json=post_data, headers={
                                "content-type": "application/json"})
+        logger.log(msg=result.text, level=50)
 
         return render(request, "redirect.html")
+
 
 
 def reset_password(request):
