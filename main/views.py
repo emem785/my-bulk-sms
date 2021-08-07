@@ -56,7 +56,7 @@ def reset_password(request):
     result = requests.post(post_url, json=post_data, headers={
                                "content-type": "application/json"})
 
-    return JsonResponse({"msg": "success"})
+    return render(request, "redirect.html")
 
 
 @api_view(['POST', 'GET'])
