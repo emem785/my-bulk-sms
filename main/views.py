@@ -1,37 +1,64 @@
+import json
+
+import requests
 from django.http.response import JsonResponse
-# from django.shortcuts import render, redirect, get_object_or_404
-from rest_framework.decorators import api_view,permission_classes
-from rest_framework.response import Response
+from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework import status
-from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_405_METHOD_NOT_ALLOWED
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.generics import GenericAPIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.status import (HTTP_201_CREATED, HTTP_400_BAD_REQUEST,
+                                   HTTP_405_METHOD_NOT_ALLOWED)
+from whisper.settings import logger
+
 from .models import *
 from .serializers import *
-from rest_framework.generics import GenericAPIView
-import requests
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authtoken.models import Token
-from django.shortcuts import render
 
 
+def test_view(request):
+        return render(request, "redirect.html")
 
 def activate_email(request):
 
     if request.method == "GET":
         uid = request.GET.get('uid')
         token = request.GET.get('token')
-        payload = {'uid': uid, 'token': token}
-        print(token)
-        
+        protocol = 'https://' if request.is_secure() else 'http://'
+        web_url = protocol + request.get_host()
+        post_url = web_url + "/auth/users/activation/"
+        post_data = {'uid': uid, 'token': token}
+        result = requests.post(post_url, json=post_data, headers={
+                               "content-type": "application/json"})
+        logger.log(msg=result.text, level=50)
 
-        url = "http://localhost:8000/auth/users/activation/"
-        response = requests.post(url, data = payload)
-
-
-        # if response.status_code == 204:
         return render(request, "redirect.html")
-        
 
-    
+
+
+def reset_password(request):
+
+    if request.method == "GET":
+        uid = request.GET.get('uid')
+        token = request.GET.get('token')
+        context = {"uid": uid, "token": token}
+        return render(request, "reset_password.html", context=context)
+
+    password = request.POST.get('password')
+    uid = request.POST.get('uid')
+    token = request.POST.get('token')
+    protocol = 'https://' if request.is_secure() else 'http://'
+    web_url = protocol + request.get_host()
+    post_url = web_url + "/auth/users/reset_password_confirm/"
+    post_data = {'uid': uid, 'token': token, 'new_password': password}
+    print(post_data)
+    result = requests.post(post_url, json=post_data, headers={
+                               "content-type": "application/json"})
+
+    return render(request, "redirect.html")
+
+
 @api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def create_message(request):
@@ -67,9 +94,9 @@ def create_message(request):
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-# TODO here is the code I was talking about 
+# TODO here is the code I was talking about
     elif request.method == 'GET':
-        header  = request.headers['Authorization']
+        header = request.headers['Authorization']
         token = header.split(" ")[1]
         user = Token.objects.get(key=token).user
         message = Message.objects.filter(user=user)

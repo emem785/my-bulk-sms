@@ -10,11 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
-from pathlib import Path
+import logging
 # import dj_database_url
 import os
 from datetime import timedelta
+from pathlib import Path
 
+# import django_heroku
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,7 +33,7 @@ SECRET_KEY = 'django-insecure-&j%h0#v$qs=%iy53vj2&*af*_1x(=g59b%8f!&e9c^&r7p9tx_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*",'emme785.pythonanywhere.com']
 
 
 # Application definition
@@ -96,12 +101,15 @@ REST_FRAMEWORK = {
 
 
 # TODO add your gmail details here
-SITE_ID = 3
+SITE_ID = 1
 EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_HOST = 'smtp.mailgun.org'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER= 'emmanuelisong1@gmail.com'
-EMAIL_HOST_PASSWORD='chafqfilylktrhrb'
+EMAIL_HOST_PASSWORD='xeqaykkgquhhcjbj'
+# EMAIL_HOST_USER= 'postmaster@sandbox3db2b50692844e79adba44b259fcd74d.mailgun.org'
+# EMAIL_HOST_PASSWORD='382623e5357749674e36929a3eae6fee-64574a68-61f182d1'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 
@@ -176,7 +184,7 @@ DJOSER = {
     'PASSWORD_CHANGED_EMAIL_CONFIRMATION':True,
     'SEND_ACTIVATION_EMAIL':True,
     'SEND_CONFIRMATION_EMAIL':True,
-    'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
+    'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/?uid={uid}&token={token}',
     'USERNAME_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
     'ACTIVATION_URL' : 'activate/?uid={uid}&token={token}',
     'TOKEN_MODEL':'rest_framework.authtoken.models.Token',
@@ -189,3 +197,4 @@ DJOSER = {
     
 }
 
+# django_heroku.settings(locals())
