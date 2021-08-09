@@ -13,3 +13,4 @@ admin.site.register(Transaction)
 admin.site.register(Group)
 admin.site.register(Template)
 admin.site.register(Sender)
+

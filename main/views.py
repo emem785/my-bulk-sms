@@ -1,4 +1,5 @@
 import json
+from re import template
 
 import requests
 from django.http.response import JsonResponse
@@ -12,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.status import (HTTP_201_CREATED, HTTP_400_BAD_REQUEST,
                                    HTTP_405_METHOD_NOT_ALLOWED)
 from whisper.settings import logger
-
+from main.helpers.helper_functions import *
 from .models import *
 from .serializers import *
 
@@ -34,6 +35,7 @@ def activate_email(request):
         logger.log(msg=result.text, level=50)
 
         return render(request, "redirect.html")
+        
 
 
 
@@ -96,9 +98,8 @@ def create_message(request):
 
 # TODO here is the code I was talking about
     elif request.method == 'GET':
-        header = request.headers['Authorization']
-        token = header.split(" ")[1]
-        user = Token.objects.get(key=token).user
+        user_token_extractor(request, Token)
+
         message = Message.objects.filter(user=user)
         serializer = MessageSerializer(message, many=True)
         return Response(serializer.data)
@@ -130,12 +131,28 @@ def message_detail(request, pk, format=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['POST'])
+@api_view(['POST', 'GET','PUT','DELETE'])
 @permission_classes((IsAuthenticated,))
 def create_group(request):
     if request.method == 'POST':
 
-        serializer = GroupSerializer(data=request.data)
+        userid = {
+            "user": str(user_token_extractor(request, Token))
+        }
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(userid)
+
+        user_request = request.data
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(user_request)
+        
+        users_request = {**user_request, **userid}
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(users_request)
+        serializer = GroupSerializer(data=users_request)
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(serializer)
+        # serializer = GroupSerializer(data=request.data)
 
         if serializer.is_valid():
             serializer.save()
@@ -150,11 +167,12 @@ def create_group(request):
 
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
-
-    # elif request.method == 'GET':
-    #     customer = Customer.objects.all()
-    #     serializer = CustomerSerializer(customer, many=True)
-    #     return Response(serializer.data)
+    
+    elif request.method == 'GET':
+        user = user_token_extractor(request, Token)
+        group = Group.objects.filter(user=user)
+        serializer = GroupSerializer(group, many=True)
+        return Response(serializer.data)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -182,12 +200,26 @@ def group_detail(request, pk, format=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['POST'])
+@api_view(['POST', 'GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated,))
 def create_sender(request):
     if request.method == 'POST':
-
-        serializer = SenderSerializer(data=request.data)
+        userid = {
+            "user": str(user_token_extractor(request, Token))
+        }
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(userid)
+        
+        user_request = request.data
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(user_request)
+        
+        users_request = {**user_request, **userid}
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(users_request)
+        serializer = SenderSerializer(data=users_request)
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(serializer)
 
         if serializer.is_valid():
             serializer.save()
@@ -203,11 +235,12 @@ def create_sender(request):
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    # elif request.method == 'GET':
-    #     customer = Customer.objects.all()
-    #     serializer = CustomerSerializer(customer, many=True)
-    #     return Response(serializer.data)
+    elif request.method == 'GET':
+        user = user_token_extractor(request, Token)
 
+        sender = Sender.objects.filter(user=user)
+        serializer = SenderSerializer(sender, many=True)
+        return Response(serializer.data)
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated,))
@@ -239,6 +272,7 @@ def sender_detail(request, pk, format=None):
 @permission_classes((IsAuthenticated,))
 def create_contact(request):
     if request.method == 'POST':
+        
         serializer = ContactSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -287,11 +321,27 @@ def contact_detail(request, pk, format=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def create_template(request):
     if request.method == 'POST':
-        serializer = TemplateSerializer(data=request.data)
+        userid = {
+            "user": str(user_token_extractor(request, Token))
+        }
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(userid)
+
+        user_request = request.data
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(user_request)
+        
+        users_request = {**user_request, **userid}
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(users_request)
+        serializer = TemplateSerializer(data=users_request)
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(serializer)
+        
 
         if serializer.is_valid():
             serializer.save()
@@ -306,6 +356,12 @@ def create_template(request):
 
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
+    elif request.method == 'GET':
+        user = user_token_extractor(request, Token)
+
+        template = Template.objects.filter(user=user)
+        serializer = TemplateSerializer(template, many=True)
+        return Response(serializer.data)
 
     # elif request.method == 'GET':
     #     customer = Customer.objects.all()
