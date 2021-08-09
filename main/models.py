@@ -30,9 +30,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
-
-
-
 class Message(models.Model):
     # customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
