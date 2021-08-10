@@ -7,7 +7,7 @@ urlpatterns = [
     path('message/', create_message),
     path('user/<int:pk>', message_detail),
     path('group/', create_group),
-    path('user/<int:pk>', group_detail),
+    path('group/<int:pk>', group_detail),
     path('transaction/', create_transaction),
     path('user/<int:pk>', transaction_detail),
     path('sender/', create_sender),
