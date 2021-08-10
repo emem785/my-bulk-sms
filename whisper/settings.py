@@ -15,12 +15,8 @@ import logging
 import os
 from datetime import timedelta
 from pathlib import Path
-import environ
-
 
 # Initialise environment variables
-env = environ.Env()
-environ.Env.read_env()
 
 # import django_heroku
 
@@ -34,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = "django-insecure-&j%h0#v$qs=%iy53vj2&*af*_1x(=g59b%8f!&e9c^&r7p9tx_"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
