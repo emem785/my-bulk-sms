@@ -1,4 +1,5 @@
 import json
+from functools import partial
 from re import template
 
 import requests
@@ -13,7 +14,9 @@ from rest_framework.response import Response
 from rest_framework.status import (HTTP_201_CREATED, HTTP_400_BAD_REQUEST,
                                    HTTP_405_METHOD_NOT_ALLOWED)
 from whisper.settings import logger
+
 from main.helpers.helper_functions import *
+
 from .models import *
 from .serializers import *
 
@@ -257,7 +260,7 @@ def sender_detail(request, pk, format=None):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = CustomerSerializer(sender, data=request.data)
+        serializer = SenderSerializer(sender, data=request.data)
         if serializer.is_valid():
 
             serializer.save()
@@ -385,7 +388,7 @@ def template_detail(request, pk, format=None):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = TemplateSerializer(template, data=request.data)
+        serializer = TemplateSerializer(template, data=request.data,partial=True)
         if serializer.is_valid():
 
             serializer.save()
