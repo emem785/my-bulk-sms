@@ -107,7 +107,7 @@ REST_FRAMEWORK = {
 
 
 # TODO add your gmail details here
-SITE_ID = env('SITE_ID')
+SITE_ID = 1
 EMAIL_HOST = env('EMAIL_HOST')
 EMAIL_PORT = env('EMAIL_PORT')
 EMAIL_USE_TLS = env('EMAIL_USE_TLS')
