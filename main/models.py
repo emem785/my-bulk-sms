@@ -1,119 +1,39 @@
 
 from django.db import models
-from django.db.models.base import Model
-from main.helpers import helper_functions
-from django.conf import settings
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-# from rest_framework.authtoken.models import Tokens
-from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils.translation import ugettext_lazy as _
+from main.manager import UserManager
 
 
-class CustomUserManager(BaseUserManager):
-    """
-    Custom user model manager where email is the unique identifiers
-    for authentication instead of usernames.
-    """
 
-    def create_user(self, email, username, password, first_name, last_name, phone_no, **other_fields):
-        """
-        Create and save a User with the given email and password.
-        """
-        if not email:
-            raise ValueError(_('The Email is required'))
-        email = self.normalize_email(email)
-        user = self.model(email=email, username=username, first_name=first_name,
-                          last_name=last_name, phone_no=phone_no, **other_fields)
-        user.set_password(password)
-        user.save()
-        return user
-
-    def create_superuser(self, email, username, password, first_name, last_name, phone_no, **other_fields):
-        """
-        Create and save a SuperUser with the given email and password.
-        """
-
-        user = self.create_user(email, username, password,
-                                first_name, last_name, phone_no, **other_fields)
-
-        user.is_admin = True
-        user.is_active = True
-        user.is_super = True
-        user.is_staff = True
-
-        if other_fields.get('is_staff') is not True:
-            raise ValueError(_('Superuser must have is_staff=True.'))
-        if other_fields.get('is_superuser') is not True:
-            raise ValueError(_('Superuser must have is_superuser=True.'))
-        return user
-
-        user.save(using=self._db)
-        return user
-
-
-class User(AbstractUser):
-    username = models.CharField(blank=True, null=True, max_length=255)
-    email = models.EmailField(_('email address'), unique=True)
-    is_active = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    phone_no = models.PositiveIntegerField(unique=True)
+class User(AbstractBaseUser, PermissionsMixin):
+    first_name    = models.CharField(_('first name'),max_length = 250)
+    last_name    = models.CharField(_('last name'),max_length = 250)
+    email         = models.EmailField(_('email'), unique=True)
+    phone         = models.CharField(_('phone'), max_length = 20, unique = True)
+    address       = models.CharField(_('address'), max_length = 250, null = True)
+    password      = models.CharField(_('password'), max_length=300)
+    is_staff      = models.BooleanField(_('staff'), default=False)
+    is_admin      = models.BooleanField(_('admin'), default= False)
+    is_active     = models.BooleanField(_('active'), default=True)
+    date_joined   = models.DateTimeField(_('date joined'), auto_now_add=True)
+    objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_no', 'username']
+    REQUIRED_FIELDS = ['first_name','last_name','phone']
 
-    objects = CustomUserManager()
-
-    def __str__(self):
-        return "{}".format(self.email)
-
-
-# class UserProfile(models.Model):
-#     user = models.OneToOneField(
-#         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
-#     first_name = models.CharField(max_length=100)
-#     last_name = models.CharField(max_length=100)
-#     phone_no = models.PositiveIntegerField(unique=True)
-#     email = models.EmailField(max_length=100, unique=True)
-#     isemailverified = models.BooleanField(default=False)
-#     joined_date = models.DateTimeField(auto_now_add=True)
-#     password = models.CharField(max_length=50)
-
-#     @staticmethod
-#     def create_new_user(user, first_name, last_name, email, phone_no, password):
-#         newUserProfile = UserProfile(
-#             user=user,
-#             first_name=first_name,
-#             last_name=last_name,
-#             email=email,
-#             phone_no=phone_no,
-#             password=password
-#         )
-#         newUserProfile.save()
-#         return newUserProfile
-
-
-# Create your models here.
-
-
-class Customer(models.Model):
-    # customer_id = models.IntegerField()
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    phone_no = models.PositiveIntegerField(unique=True)
-    email = models.EmailField(max_length=100, unique=True)
-    isemailverified = models.BooleanField(default=False)
-    joined_date = models.DateTimeField(auto_now_add=True)
-    password = models.CharField(max_length=50)
+    class Meta:
+        verbose_name = _('user')
+        verbose_name_plural = _('users')
 
     def __str__(self):
-        return f'{self.username} -- {self.id}'
+        return self.email
 
 
 class Message(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    # customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    
+    user = models.EmailField(max_length=150)
     # Message_ID = models.IntegerField()
     message_content = models.TextField(max_length=2000)
     to = models.TextField()
@@ -131,11 +51,9 @@ class Message(models.Model):
 
 
 class Group(models.Model):
-    # group_Id= models.IntegerField(unique=True) unnecessary bcause django auto create id for every model
-    # changed to name to avoid redundancy
     name = models.CharField(max_length=200)
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    contact_sum = models.IntegerField()
+    user = models.EmailField(max_length=150)
+    contact_sum = models.IntegerField(default=0)
     created_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -147,7 +65,8 @@ class Group(models.Model):
 
 
 class Contact(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    # customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    user = models.EmailField(max_length=150)
     # contact = models.IntegerField() auto generated
     mobile_numbers = models.TextField()
     group = models.OneToOneField(Group, on_delete=models.CASCADE)
@@ -156,7 +75,9 @@ class Contact(models.Model):
 
 
 class Transaction(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    # customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    
+    user = models.EmailField(max_length=150)
     # transaction_id = models.IntegerField() autogenerated by django
     amount = models.IntegerField()
     unit = models.IntegerField()
@@ -171,7 +92,9 @@ class Transaction(models.Model):
 
 class Template(models.Model):
     # template_id = models.IntegerField() #autogenerated by django
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    # customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    
+    user = models.EmailField(max_length=150)
     title = models.CharField(max_length=100)
     content_message = models.TextField(max_length=2000)
     date_created = models.DateTimeField(auto_now_add=True)
@@ -179,9 +102,10 @@ class Template(models.Model):
 
 
 class Sender(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    # customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    
+    user = models.EmailField(max_length=150)
     # _id = models.IntegerField() auto generated bydjango
-    sender = models.OneToOneField(
-        Message, on_delete=models.CASCADE, unique=True)  # Unique
+    sender = models.CharField(max_length=100, unique=True)  # Unique
     company_name = models.CharField(max_length=100)
     date_created = models.DateTimeField(auto_now_add=True)

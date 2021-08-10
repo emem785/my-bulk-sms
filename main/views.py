@@ -1,110 +1,68 @@
+import json
+from re import template
+
+import requests
 from django.http.response import JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework import status
-from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_405_METHOD_NOT_ALLOWED
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.generics import GenericAPIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.status import (HTTP_201_CREATED, HTTP_400_BAD_REQUEST,
+                                   HTTP_405_METHOD_NOT_ALLOWED)
+from whisper.settings import logger
+from main.helpers.helper_functions import *
 from .models import *
 from .serializers import *
 
 
-# @api_view(['POST'])
-# def create_user(request):
-# if request.method == 'POST':
-#     cusUserSerializer = CustomUserSerializer(data=request.data)
+def test_view(request):
+        return render(request, "redirect.html")
 
-#     if cusUserSerializer.is_valid():
-#         phone = request.data["profile"]["phone_no"]
+def activate_email(request):
 
-#         exist = UserProfile.objects.exists()
-#         if exist:
-#             return JsonResponse({"msg": "user with this phone exists"})
+    if request.method == "GET":
+        uid = request.GET.get('uid')
+        token = request.GET.get('token')
+        protocol = 'https://' if request.is_secure() else 'http://'
+        web_url = protocol + request.get_host()
+        post_url = web_url + "/auth/users/activation/"
+        post_data = {'uid': uid, 'token': token}
+        result = requests.post(post_url, json=post_data, headers={
+                               "content-type": "application/json"})
+        logger.log(msg=result.text, level=50)
 
-#         cusUser = cusUserSerializer.save()
-
-#         return Response(cusUserSerializer.data)
-
-#     return Response(cusUserSerializer.errors)
-
-# userSerializer = UserSerializer(data=request.data)
-
-# serializer = UserProfileSerializer(data=request.data)
-
-# if userSerializer.is_valid():
-#     userSerializer.save()
-#     print('>>>>>>>>>>>>>')
-#     print(userSerializer)
-#     profile = request.data
-#     userProfile = profile.add(user=userSerializer)
-#     seriliazedUserProfile = UserProfileSerializer(data=userProfile)
-#     print('<<<<<<<<<<<')
-#     print(seriliazedUserProfile)
-#     if seriliazedUserProfile.is_valid():
-#         seriliazedUserProfile.save()
-
-# userEmail = serializer.validated_data.get('email')
-# userPassword = serializer.validated_data.get('password')
-# user_queryset = UserProfile.objects.filter(email=userEmail)
-
-# if user_queryset.exists():
-#     message = {
-#         "status": "Sorry email already exist, please try another email"
-#     }
-#     print("[[[[[[[[[[[[[[[[[[[[[")
-#     print('..................')
-#     print(message)
-
-#     return Response(data=message, status=HTTP_201_CREATED)
-
-# else:
-#     serializer.save()
-
-#     message = {
-#         "status": "Success"
-#     }
-#     print("[[[[[[[[[[[[[[[[[[[[[")
-#     print('..................')
-#     print(message)
-
-#     return Response(data=message, status=HTTP_201_CREATED)
-
-# else:
-#     return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
-
-# elif request.method == 'GET':
-#     customer = Customer.objects.all()
-#     serializer = CustomerSerializer(customer, many=True)
-#     return Response(serializer.data)
+        return render(request, "redirect.html")
+        
 
 
-@api_view(['GET', 'PUT'])
-def user_detail(request, pk, format=None):
 
-    try:
-        user = UserProfile.objects.get(pk=pk)
-    except UserProfile.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+def reset_password(request):
 
-    if request.method == 'GET':
-        serializer = UserProfileSerializer(user)
-        return Response(serializer.data)
+    if request.method == "GET":
+        uid = request.GET.get('uid')
+        token = request.GET.get('token')
+        context = {"uid": uid, "token": token}
+        return render(request, "reset_password.html", context=context)
 
-    elif request.method == 'PUT':
-        serializer = UserProfileSerializer(user, data=request.data)
-        if serializer.is_valid():
+    password = request.POST.get('password')
+    uid = request.POST.get('uid')
+    token = request.POST.get('token')
+    protocol = 'https://' if request.is_secure() else 'http://'
+    web_url = protocol + request.get_host()
+    post_url = web_url + "/auth/users/reset_password_confirm/"
+    post_data = {'uid': uid, 'token': token, 'new_password': password}
+    print(post_data)
+    result = requests.post(post_url, json=post_data, headers={
+                               "content-type": "application/json"})
 
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    else:
-        message = {
-            "status": "Ivalid method"
-        }
-        return Response(message, status=HTTP_405_METHOD_NOT_ALLOWED)
+    return render(request, "redirect.html")
 
 
 @api_view(['POST', 'GET'])
+@permission_classes((IsAuthenticated,))
 def create_message(request):
     if request.method == 'POST':
 
@@ -138,13 +96,17 @@ def create_message(request):
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
 
+# TODO here is the code I was talking about
     elif request.method == 'GET':
-        message = Message.objects.all()
+        user_token_extractor(request, Token)
+
+        message = Message.objects.filter(user=user)
         serializer = MessageSerializer(message, many=True)
         return Response(serializer.data)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes((IsAuthenticated,))
 def message_detail(request, pk, format=None):
 
     try:
@@ -169,11 +131,28 @@ def message_detail(request, pk, format=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['POST'])
+@api_view(['POST', 'GET','PUT','DELETE'])
+@permission_classes((IsAuthenticated,))
 def create_group(request):
     if request.method == 'POST':
 
-        serializer = GroupSerializer(data=request.data)
+        userid = {
+            "user": str(user_token_extractor(request, Token))
+        }
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(userid)
+
+        user_request = request.data
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(user_request)
+        
+        users_request = {**user_request, **userid}
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(users_request)
+        serializer = GroupSerializer(data=users_request)
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(serializer)
+        # serializer = GroupSerializer(data=request.data)
 
         if serializer.is_valid():
             serializer.save()
@@ -188,11 +167,12 @@ def create_group(request):
 
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
-
-    # elif request.method == 'GET':
-    #     customer = Customer.objects.all()
-    #     serializer = CustomerSerializer(customer, many=True)
-    #     return Response(serializer.data)
+    
+    elif request.method == 'GET':
+        user = user_token_extractor(request, Token)
+        group = Group.objects.filter(user=user)
+        serializer = GroupSerializer(group, many=True)
+        return Response(serializer.data)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -220,11 +200,26 @@ def group_detail(request, pk, format=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['POST'])
+@api_view(['POST', 'GET', 'PUT', 'DELETE'])
+@permission_classes((IsAuthenticated,))
 def create_sender(request):
     if request.method == 'POST':
-
-        serializer = SenderSerializer(data=request.data)
+        userid = {
+            "user": str(user_token_extractor(request, Token))
+        }
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(userid)
+        
+        user_request = request.data
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(user_request)
+        
+        users_request = {**user_request, **userid}
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(users_request)
+        serializer = SenderSerializer(data=users_request)
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(serializer)
 
         if serializer.is_valid():
             serializer.save()
@@ -240,13 +235,15 @@ def create_sender(request):
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    # elif request.method == 'GET':
-    #     customer = Customer.objects.all()
-    #     serializer = CustomerSerializer(customer, many=True)
-    #     return Response(serializer.data)
+    elif request.method == 'GET':
+        user = user_token_extractor(request, Token)
 
+        sender = Sender.objects.filter(user=user)
+        serializer = SenderSerializer(sender, many=True)
+        return Response(serializer.data)
 
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes((IsAuthenticated,))
 def sender_detail(request, pk, format=None):
 
     try:
@@ -272,8 +269,10 @@ def sender_detail(request, pk, format=None):
 
 
 @api_view(['POST'])
+@permission_classes((IsAuthenticated,))
 def create_contact(request):
     if request.method == 'POST':
+        
         serializer = ContactSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -297,6 +296,7 @@ def create_contact(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes((IsAuthenticated,))
 def contact_detail(request, pk, format=None):
 
     try:
@@ -321,10 +321,27 @@ def contact_detail(request, pk, format=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
+@permission_classes((IsAuthenticated,))
 def create_template(request):
     if request.method == 'POST':
-        serializer = TemplateSerializer(data=request.data)
+        userid = {
+            "user": str(user_token_extractor(request, Token))
+        }
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(userid)
+
+        user_request = request.data
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(user_request)
+        
+        users_request = {**user_request, **userid}
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(users_request)
+        serializer = TemplateSerializer(data=users_request)
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(serializer)
+        
 
         if serializer.is_valid():
             serializer.save()
@@ -339,6 +356,12 @@ def create_template(request):
 
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
+    elif request.method == 'GET':
+        user = user_token_extractor(request, Token)
+
+        template = Template.objects.filter(user=user)
+        serializer = TemplateSerializer(template, many=True)
+        return Response(serializer.data)
 
     # elif request.method == 'GET':
     #     customer = Customer.objects.all()
@@ -347,6 +370,7 @@ def create_template(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes((IsAuthenticated,))
 def template_detail(request, pk, format=None):
 
     try:
@@ -372,6 +396,7 @@ def template_detail(request, pk, format=None):
 
 
 @api_view(['POST'])
+@permission_classes((IsAuthenticated,))
 def create_transaction(request):
     if request.method == 'POST':
         serializer = TransactionSerializer(data=request.data)
@@ -397,6 +422,7 @@ def create_transaction(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes((IsAuthenticated,))
 def transaction_detail(request, pk, format=None):
 
     try:
