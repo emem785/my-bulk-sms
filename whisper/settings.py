@@ -15,8 +15,14 @@ import logging
 import os
 from datetime import timedelta
 from pathlib import Path
+import environ
 
-import django_heroku
+
+# Initialise environment variables
+env = environ.Env()
+environ.Env.read_env()
+
+# import django_heroku
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -28,12 +34,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&j%h0#v$qs=%iy53vj2&*af*_1x(=g59b%8f!&e9c^&r7p9tx_'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*",'emme785.pythonanywhere.com']
+ALLOWED_HOSTS = ["*", 'emme785.pythonanywhere.com']
 
 
 # Application definition
@@ -48,13 +54,13 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'rest_framework.authtoken',
     'main',
-    #api
+    # api
     'rest_framework',
     
     #auth
     'djoser',
-    
-    #docs
+
+    # docs
     'drf_yasg',
     'coreapi'
 ]
@@ -124,7 +130,7 @@ DATABASES = {
 }
 
 
-# 
+#
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -176,19 +182,18 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 
-
 DJOSER = {
     'LOGIN_FIELD': 'email',
     'USER_CREATE_PASSWORD_RETYPE': True,
-    'USERNAME_CHANGED_EMAIL_CONFIRMATION':True,
-    'PASSWORD_CHANGED_EMAIL_CONFIRMATION':True,
-    'SEND_ACTIVATION_EMAIL':True,
-    'SEND_CONFIRMATION_EMAIL':True,
+    'USERNAME_CHANGED_EMAIL_CONFIRMATION': True,
+    'PASSWORD_CHANGED_EMAIL_CONFIRMATION': True,
+    'SEND_ACTIVATION_EMAIL': True,
+    'SEND_CONFIRMATION_EMAIL': True,
     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/?uid={uid}&token={token}',
     'USERNAME_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
-    'ACTIVATION_URL' : 'activate/?uid={uid}&token={token}',
-    'TOKEN_MODEL':'rest_framework.authtoken.models.Token',
-    'SERIALIZERS':{
+    'ACTIVATION_URL': 'activate/?uid={uid}&token={token}',
+    'TOKEN_MODEL': 'rest_framework.authtoken.models.Token',
+    'SERIALIZERS': {
         'user_create': 'main.serializers.UserCreateSerializer',
         'user': 'main.serializers.UserCreateSerializer',
         'user_delete': 'djoser.serializers.UserDeleteSerializer'
@@ -197,4 +202,4 @@ DJOSER = {
     
 }
 
-django_heroku.settings(locals())
+# django_heroku.settings(locals())

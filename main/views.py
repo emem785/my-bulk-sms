@@ -19,7 +19,8 @@ from .serializers import *
 
 
 def test_view(request):
-        return render(request, "redirect.html")
+    return render(request, "redirect.html")
+
 
 def activate_email(request):
 
@@ -35,8 +36,6 @@ def activate_email(request):
         logger.log(msg=result.text, level=50)
 
         return render(request, "redirect.html")
-        
-
 
 
 def reset_password(request):
@@ -131,7 +130,7 @@ def message_detail(request, pk, format=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['POST', 'GET','PUT','DELETE'])
+@api_view(['POST', 'GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated,))
 def create_group(request):
     if request.method == 'POST':
@@ -145,7 +144,7 @@ def create_group(request):
         user_request = request.data
         print("<<<<<<<<<>>>>>>>>>>>>>>>")
         print(user_request)
-        
+
         users_request = {**user_request, **userid}
         print("<<<<<<<<<>>>>>>>>>>>>>>>")
         print(users_request)
@@ -167,7 +166,7 @@ def create_group(request):
 
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
-    
+
     elif request.method == 'GET':
         user = user_token_extractor(request, Token)
         group = Group.objects.filter(user=user)
@@ -178,8 +177,9 @@ def create_group(request):
 @api_view(['GET', 'PUT', 'DELETE'])
 def group_detail(request, pk, format=None):
 
+    user = user_token_extractor(request, Token)
     try:
-        group = Group.objects.get(pk=pk)
+        group = Group.objects.get(pk=pk, user=user)
     except Group.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -209,11 +209,11 @@ def create_sender(request):
         }
         print("<<<<<<<<<>>>>>>>>>>>>>>>")
         print(userid)
-        
+
         user_request = request.data
         print("<<<<<<<<<>>>>>>>>>>>>>>>")
         print(user_request)
-        
+
         users_request = {**user_request, **userid}
         print("<<<<<<<<<>>>>>>>>>>>>>>>")
         print(users_request)
@@ -246,8 +246,9 @@ def create_sender(request):
 @permission_classes((IsAuthenticated,))
 def sender_detail(request, pk, format=None):
 
+    user = user_token_extractor(request, Token)
     try:
-        sender = Sender.objects.get(pk=pk)
+        sender = Sender.objects.get(pk=pk, user=user)
     except Sender.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -272,7 +273,7 @@ def sender_detail(request, pk, format=None):
 @permission_classes((IsAuthenticated,))
 def create_contact(request):
     if request.method == 'POST':
-        
+
         serializer = ContactSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -334,14 +335,13 @@ def create_template(request):
         user_request = request.data
         print("<<<<<<<<<>>>>>>>>>>>>>>>")
         print(user_request)
-        
+
         users_request = {**user_request, **userid}
         print("<<<<<<<<<>>>>>>>>>>>>>>>")
         print(users_request)
         serializer = TemplateSerializer(data=users_request)
         print("<<<<<<<<<>>>>>>>>>>>>>>>")
         print(serializer)
-        
 
         if serializer.is_valid():
             serializer.save()
@@ -373,8 +373,10 @@ def create_template(request):
 @permission_classes((IsAuthenticated,))
 def template_detail(request, pk, format=None):
 
+    user = user_token_extractor(request, Token)
+
     try:
-        template = Template.objects.get(pk=pk)
+        template = Template.objects.get(pk=pk, user=user)
     except Template.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
