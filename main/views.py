@@ -258,6 +258,21 @@ def sender_detail(request, pk, format=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def create_contacts(request):
+    if request.method == 'POST':
+        serializer = ContactSerializer(data=request.data,many=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            message = {"msg":"success"}
+            return Response(message, status=HTTP_201_CREATED)
+
+        else:
+            return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+
 @api_view(['POST','GET','DELETE'])
 @permission_classes((IsAuthenticated,))
 def create_contact(request):

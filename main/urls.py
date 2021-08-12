@@ -1,6 +1,6 @@
-from main.views import *
 from django.urls import path
 
+from main.views import *
 
 urlpatterns = [
 
@@ -15,5 +15,6 @@ urlpatterns = [
     path('template/', create_template),
     path('template/<int:pk>', template_detail),
     path('contact/', create_contact),
+    path('contacts/', create_contacts),
     path('contact/<int:pk>', contact_detail),
 ]
