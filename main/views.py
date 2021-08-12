@@ -181,6 +181,7 @@ def group_detail(request, pk, format=None):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
+        group.delete()
         user = user_token_extractor(request, Token)
         group = Group.objects.filter(user=user.email)
         serializer = GroupSerializer(group, many=True)
