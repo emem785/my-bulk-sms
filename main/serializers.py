@@ -33,12 +33,20 @@ class ContactSerializer(ModelSerializer):
         fields = '__all__'
 
 class GroupSerializer(ModelSerializer):
-    contacts = ContactSerializer(many=True,read_only=True)
+    contacts = ContactSerializer(many=True)
 
     class Meta:
         model = Group
         fields = "__all__"
-        read_only_fields = ('id',)
+        
+        
+    def create(self, validated_data):
+        contacts_ = validated_data.pop('contacts')
+        group = Group.objects.create(**validated_data)
+        
+        for contact in contacts_:
+            Contact.objects.create(group=group, **contact)
+        return group
     
 
 
