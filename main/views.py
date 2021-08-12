@@ -138,41 +138,23 @@ def message_detail(request, pk, format=None):
 def create_group(request):
     if request.method == 'POST':
 
-        userid = {
-            "user": str(user_token_extractor(request, Token))
-        }
-        print("<<<<<<<<<>>>>>>>>>>>>>>>")
-        print(userid)
-
-        user_request = request.data
-        print("<<<<<<<<<>>>>>>>>>>>>>>>")
-        print(user_request)
-
-        users_request = {**user_request, **userid}
-        print("<<<<<<<<<>>>>>>>>>>>>>>>")
-        print(users_request)
-        serializer = GroupSerializer(data=users_request)
-        print("<<<<<<<<<>>>>>>>>>>>>>>>")
-        print(serializer)
-        # serializer = GroupSerializer(data=request.data)
+        user = user_token_extractor(request, Token)
+        serializer = GroupSerializer(data=request.data)
+        serializer.initial_data["user"] = user.email
 
         if serializer.is_valid():
             serializer.save()
-            message = {
-                "status": "Success"
-            }
-            print("[[[[[[[[[[[[[[[[[[[[[")
-            print('..................')
-            print(message)
-
-            return Response(data=message, status=HTTP_201_CREATED)
+            user = user_token_extractor(request, Token)
+            group = Group.objects.filter(user=user.email)
+            serializer = GroupSerializer(group, many=True)
+            return Response(data=serializer.data, status=HTTP_201_CREATED)
 
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
 
     elif request.method == 'GET':
         user = user_token_extractor(request, Token)
-        group = Group.objects.filter(user=user)
+        group = Group.objects.filter(user=user.email)
         serializer = GroupSerializer(group, many=True)
         return Response(serializer.data)
 
@@ -272,31 +254,20 @@ def sender_detail(request, pk, format=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['POST'])
+@api_view(['POST','GET'])
 @permission_classes((IsAuthenticated,))
 def create_contact(request):
     if request.method == 'POST':
-
-        serializer = ContactSerializer(data=request.data)
+        serializer = ContactSerializer(data=request.data,many=True)
 
         if serializer.is_valid():
             serializer.save()
-            message = {
-                "status": "Success"
-            }
-            print("[[[[[[[[[[[[[[[[[[[[[")
-            print('..................')
-            print(message)
-
+            message = {"status": "Success"}
             return Response(data=message, status=HTTP_201_CREATED)
 
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    # elif request.method == 'GET':
-    #     customer = Customer.objects.all()
-    #     serializer = CustomerSerializer(customer, many=True)
-    #     return Response(serializer.data)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
