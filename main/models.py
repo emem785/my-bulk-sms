@@ -17,11 +17,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_admin      = models.BooleanField(_('admin'), default= False)
     is_active     = models.BooleanField(_('active'), default=True)
     date_joined   = models.DateTimeField(_('date joined'), auto_now_add=True)
-    firebase_key      = models.CharField(_('firebase_key'), max_length=300,null=True)
+    firebase_key      = models.CharField(_('firebase_key'), max_length=300,default="FBK")
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name','last_name','phone']
+    REQUIRED_FIELDS = ['first_name','last_name','phone','firebase_key']
 
     class Meta:
         verbose_name = _('user')

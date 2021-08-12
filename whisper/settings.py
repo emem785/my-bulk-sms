@@ -16,6 +16,8 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from helpers.cloud import CloudMessaging
+
 # Initialise environment variables
 
 # import django_heroku
@@ -24,6 +26,10 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+cloud_messaging = CloudMessaging()
+
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -198,4 +204,3 @@ DJOSER = {
     
 }
 
-# django_heroku.settings(locals())
