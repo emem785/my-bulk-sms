@@ -258,7 +258,7 @@ def sender_detail(request, pk, format=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['POST','GET'])
+@api_view(['POST','GET','DELETE'])
 @permission_classes((IsAuthenticated,))
 def create_contact(request):
     if request.method == 'POST':
@@ -272,6 +272,14 @@ def create_contact(request):
 
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+    if request.method == 'DELETE':
+        delete_ids = request.data["contacts"]
+        contacts = Contact.objects.filter(pk__in=delete_ids).delete()
+        contacts = Contact.objects.filter(group=int(request.data["group"]))
+        serializer = ContactSerializer(contacts, many=True)
+        return Response(serializer.data, status=HTTP_201_CREATED)
+
 
 
 
@@ -289,7 +297,7 @@ def contact_detail(request, pk, format=None):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = GroupSerializer(contact, data=request.data)
+        serializer = ContactSerializer(contact, data=request.data)
         if serializer.is_valid():
 
             serializer.save()
@@ -408,11 +416,11 @@ def transaction_detail(request, pk, format=None):
 
     try:
         transaction = Transaction.objects.get(pk=pk)
-    except Group.DoesNotExist:
+    except Contact.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = GroupSerializer(transaction)
+        serializer = ContactSerializer(transaction)
         return Response(serializer.data)
 
     elif request.method == 'PUT':
