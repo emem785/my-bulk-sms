@@ -169,7 +169,7 @@ def group_detail(request, pk, format=None):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = GroupSerializer(group)
+        serializer = ContactSerializer(data=group.contacts,many=True)
         return Response(serializer.data)
 
     elif request.method == 'PUT':
