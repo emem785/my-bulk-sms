@@ -170,7 +170,8 @@ def group_detail(request, pk, format=None):
 
     if request.method == 'GET':
         serializer = ContactSerializer(data=group.contacts,many=True)
-        return Response(serializer.data)
+        if serializer.is_valid():
+            return Response(serializer.data)
 
     elif request.method == 'PUT':
         serializer = GroupSerializer(group, data=request.data)
