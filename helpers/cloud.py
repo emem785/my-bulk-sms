@@ -1,5 +1,4 @@
 
-# from beeep.settings import BASE_DIR
 import os
 
 import firebase_admin
@@ -7,8 +6,8 @@ from firebase_admin import credentials, messaging
 
 
 class CloudMessaging:
-    def __init__(self):
-        path = "E:/Documents/LibertyProject/WhisperMobilePersonal/server/bulk-sms-app/main/whispersms-firebase-adminsdk-e9ml9-bf5fbf7400.json"
+    def __init__(self,base_dir):
+        path = f"{base_dir}/main/whispersms-firebase-adminsdk-e9ml9-bf5fbf7400.json"
         cred = credentials.Certificate(path)
         firebase_admin.initialize_app(cred)
 

@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-cloud_messaging = CloudMessaging()
+cloud_messaging = CloudMessaging(BASE_DIR)
 
 
 
