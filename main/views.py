@@ -181,8 +181,10 @@ def group_detail(request, pk, format=None):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
-        group.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        user = user_token_extractor(request, Token)
+        group = Group.objects.filter(user=user.email)
+        serializer = GroupSerializer(group, many=True)
+        return Response(serializer.data)
 
 
 @api_view(['POST', 'GET', 'PUT', 'DELETE'])
