@@ -262,12 +262,13 @@ def sender_detail(request, pk, format=None):
 @permission_classes((IsAuthenticated,))
 def create_contact(request):
     if request.method == 'POST':
-        serializer = ContactSerializer(data=request.data,many=True)
+        serializer = ContactSerializer(data=request.data)
 
         if serializer.is_valid():
             serializer.save()
-            message = {"status": "Success"}
-            return Response(data=message, status=HTTP_201_CREATED)
+            contacts = Contact.objects.filter(group=int(request.data["group"]))
+            serializer = ContactSerializer(contacts, many=True)
+            return Response(serializer.data, status=HTTP_201_CREATED)
 
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
