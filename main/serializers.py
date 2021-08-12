@@ -11,19 +11,16 @@ User = get_user_model()
 
 
 class UserCreateSerializer(UserCreateSerializer):
-    
+
     class Meta(UserCreateSerializer.Meta):
         model = User
         fields = '__all__'
-        
-
-
 
 
 class MessageSerializer(ModelSerializer):
     class Meta:
         model = Message
-        fields = ['content','sender_name']
+        fields = ['content', 'sender_name']
 
 
 class GroupSerializer(ModelSerializer):
@@ -53,4 +50,10 @@ class TemplateSerializer(ModelSerializer):
 class ContactSerializer(ModelSerializer):
     class Meta:
         model = Contact
+        fields = '__all__'
+
+
+class ContactInitSerializer(ModelSerializer):
+    class Meta:
+        model = ContactInit
         fields = '__all__'
