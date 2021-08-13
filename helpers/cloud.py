@@ -8,8 +8,8 @@ from firebase_admin import credentials, messaging
 class CloudMessaging:
     def __init__(self,base_dir):
         path = f"{base_dir}/main/whispersms-firebase-adminsdk-e9ml9-bf5fbf7400.json"
-        # cred = credentials.Certificate(path)
-        # firebase_admin.initialize_app(cred)
+        cred = credentials.Certificate(path)
+        firebase_admin.initialize_app(cred)
 
     def send_broadcast(self,token,message):
         # See documentation on defining a message payload.
