@@ -1,16 +1,22 @@
+import json
+from functools import partial
 from re import template
 
 import requests
+from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import (HTTP_201_CREATED, HTTP_400_BAD_REQUEST,
                                    HTTP_405_METHOD_NOT_ALLOWED)
 from whisper.settings import logger
+
 from main.helpers.helper_functions import *
+
 from .models import *
 from .serializers import *
 
@@ -62,9 +68,22 @@ def reset_password(request):
 def create_message(request):
     if request.method == 'POST':
 
-        serializer = MessageSerializer(data=request.data, partial=True)
+        serializer = MessageSerializer(data=request.data)
 
         if serializer.is_valid():
+            # useremail = serializer.validated_data.get('email')
+            # message_queryset = Message.objects.filter(email=useremail)
+
+            # if message_queryset.exists():
+            # message = {
+            #     "status": "Sorry email already exist, please try another email"
+            # }
+            #     print("[[[[[[[[[[[[[[[[[[[[[")
+            #     print('..................')
+            #     print(message)
+            # message = {
+            #     "status": "Sorry email already exist, please try another email"
+            # }
 
             serializer.save()
             message = {
@@ -81,7 +100,7 @@ def create_message(request):
 
 # TODO here is the code I was talking about
     elif request.method == 'GET':
-        user_token_extractor(request, Token)
+        user = user_token_extractor(request, Token)
 
         message = Message.objects.filter(user=user)
         serializer = MessageSerializer(message, many=True)
@@ -102,8 +121,7 @@ def message_detail(request, pk, format=None):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = MessageSerializer(
-            message, data=request.data, partial=True)
+        serializer = MessageSerializer(message, data=request.data)
         if serializer.is_valid():
 
             serializer.save()
@@ -120,41 +138,23 @@ def message_detail(request, pk, format=None):
 def create_group(request):
     if request.method == 'POST':
 
-        userid = {
-            "user": str(user_token_extractor(request, Token))
-        }
-        print("<<<<<<<<<>>>>>>>>>>>>>>>")
-        print(userid)
-
-        user_request = request.data
-        print("<<<<<<<<<>>>>>>>>>>>>>>>")
-        print(user_request)
-
-        users_request = {**user_request, **userid}
-        print("<<<<<<<<<>>>>>>>>>>>>>>>")
-        print(users_request)
-        serializer = GroupSerializer(data=users_request)
-        print("<<<<<<<<<>>>>>>>>>>>>>>>")
-        print(serializer)
-        # serializer = GroupSerializer(data=request.data)
+        user = user_token_extractor(request, Token)
+        serializer = GroupSerializer(data=request.data)
+        serializer.initial_data["user"] = user.email
 
         if serializer.is_valid():
             serializer.save()
-            message = {
-                "status": "Success"
-            }
-            print("[[[[[[[[[[[[[[[[[[[[[")
-            print('..................')
-            print(message)
-
-            return Response(data=message, status=HTTP_201_CREATED)
+            user = user_token_extractor(request, Token)
+            group = Group.objects.filter(user=user.email)
+            serializer = GroupSerializer(group, many=True)
+            return Response(data=serializer.data, status=HTTP_201_CREATED)
 
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
 
     elif request.method == 'GET':
         user = user_token_extractor(request, Token)
-        group = Group.objects.filter(user=user)
+        group = Group.objects.filter(user=user.email)
         serializer = GroupSerializer(group, many=True)
         return Response(serializer.data)
 
@@ -169,20 +169,23 @@ def group_detail(request, pk, format=None):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = GroupSerializer(group)
-        return Response(serializer.data)
+        contacts = Contact.objects.filter(group=group)
+        serializer = ContactSerializer(contacts, many=True)
+        return Response(serializer.data, status=200)
 
     elif request.method == 'PUT':
-        serializer = GroupSerializer(group, data=request.data, partial=True)
+        serializer = GroupSerializer(group, data=request.data)
         if serializer.is_valid():
-
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         group.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        user = user_token_extractor(request, Token)
+        group = Group.objects.filter(user=user.email)
+        serializer = GroupSerializer(group, many=True)
+        return Response(serializer.data)
 
 
 @api_view(['POST', 'GET', 'PUT', 'DELETE'])
@@ -243,7 +246,7 @@ def sender_detail(request, pk, format=None):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = SenderSerializer(sender, data=request.data, partial=True)
+        serializer = SenderSerializer(sender, data=request.data)
         if serializer.is_valid():
 
             serializer.save()
@@ -255,57 +258,28 @@ def sender_detail(request, pk, format=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
 @permission_classes((IsAuthenticated,))
 def create_contact(request):
     if request.method == 'POST':
-
-        userid = {
-            "user": str(user_token_extractor(request, Token))
-        }
-        print("<<<<<<<<<>>>>>>>>>>>>>>>")
-        print(userid)
-
-        user_request = contact_element_extractor(request.data, userid)
-
-        serializer = ContactInitSerializer(data=user_request)
-        print("<<<<<<<<<>>>>>>>>>>>>>>>")
-        print(request.data.get('mobile_numbers'))
-        print(serializer)
+        serializer = ContactSerializer(data=request.data)
 
         if serializer.is_valid():
-            contacts = request.data.get('mobile_numbers')
-            print('.....................')
-            print(contacts)
-
-            contact_batch_insert(contacts, Contact, user_request)
-
-            message = {
-                "status": "Success"
-            }
-            print("[[[[[[[[[[[[[[[[[[[[[")
-            print('..................')
-            print(message)
-
-            return Response(data=message, status=HTTP_201_CREATED)
+            serializer.save()
+            contacts = Contact.objects.filter(group=int(request.data["group"]))
+            serializer = ContactSerializer(contacts, many=True)
+            return Response(serializer.data, status=HTTP_201_CREATED)
 
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'GET':
-        customer = Contact.objects.all()
-        serializer = ContactSerializer(customer, many=True)
-        return Response(serializer.data)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated,))
 def contact_detail(request, pk, format=None):
 
-    user = user_token_extractor(request, Token)
-
     try:
-        contact = Contact.objects.get(pk=pk, user=user)
+        contact = Contact.objects.get(pk=pk)
     except Contact.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -314,7 +288,7 @@ def contact_detail(request, pk, format=None):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = GroupSerializer(contact, data=request.data, partial=True)
+        serializer = GroupSerializer(contact, data=request.data)
         if serializer.is_valid():
 
             serializer.save()
@@ -442,8 +416,7 @@ def transaction_detail(request, pk, format=None):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = TransactionSerializer(
-            transaction, data=request.data, partial=True)
+        serializer = TransactionSerializer(transaction, data=request.data)
         if serializer.is_valid():
 
             serializer.save()
