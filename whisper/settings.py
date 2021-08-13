@@ -16,11 +16,11 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import django_heroku
 from helpers.cloud import CloudMessaging
 
 # Initialise environment variables
 
-# import django_heroku
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -204,3 +204,4 @@ DJOSER = {
     
 }
 
+django_heroku.settings(locals())
