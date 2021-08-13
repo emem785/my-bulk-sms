@@ -16,7 +16,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
-import django_heroku
+# import django_heroku
 from helpers.cloud import CloudMessaging
 
 # Initialise environment variables
