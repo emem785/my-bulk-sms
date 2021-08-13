@@ -11,5 +11,5 @@ def create_group(sender,instance,created,**kwargs):
 		user = User.objects.get(email=instance.user)
 		token = user.firebase_key
 		print(token)
-		cloud_messaging.send_broadcast(token=token,message="Group Created")
+		cloud_messaging.send_broadcast(token=token,title="Group",body="Group created")
 		print("group created")
