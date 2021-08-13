@@ -20,6 +20,7 @@ class CloudMessaging:
                     title="Whisper Mobile",
                     body=message
                 ),
+                data={"msg":message},
                 token=token,
             )
 
