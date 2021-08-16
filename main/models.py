@@ -1,5 +1,5 @@
 
-from main.helpers.helper_functions import paystack_payment_request, unit_converter
+from main.helpers.helper_functions import initial_bonus_sum, paystack_payment_request, unit_converter
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -128,6 +128,7 @@ class Payment_verification(models.Model):
             # save to transaction table
             transact = paystack_response.get('data')
             unit = unit_converter(transact.get('amount'))
+            amount = initial_bonus_sum(transact.get('amount'))
             PaymentTransaction.create_transaction(user, transact.get(
                 'amount'), unit, transact.get('id'), reason, transact.get('reference'))
 
@@ -137,7 +138,7 @@ class Payment_verification(models.Model):
 
                 # create to balance table
                 Balance.create_balance_first_time_user(
-                    user, unit, transact.get('amount'))
+                    user, unit, amount)
 
             # otherwise update
             else:

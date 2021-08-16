@@ -373,12 +373,25 @@ def template_detail(request, pk, format=None):
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
-def view_transaction(request):
+def view_all_transaction(request):
     if request.method == 'GET':
         user = user_token_extractor(request, Token)
 
-        transaction = Transaction.objects.filter(user=user)
-        serializer = TransactionSerializer(transaction, many=True)
+        transaction = PaymentTransaction.objects.filter(user=user)
+        serializer = PaymentTransactionSerializer(transaction, many=True)
+        return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def view_one_transaction(request, pk, format=None):
+    user = user_token_extractor(request, Token)
+    try:
+        transaction = PaymentTransaction.objects.filter(pk=pk, user=user)
+    except PaymentTransaction.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        serializer = PaymentTransactionSerializer(transaction, many=True)
         return Response(serializer.data)
 
 
@@ -395,7 +408,7 @@ def view_credit_card_details(request):
 
 @api_view(['DELETE'])
 @permission_classes((IsAuthenticated,))
-def creditCard_detail(request, pk, format=None):
+def delete_creditCard(request, pk, format=None):
 
     user = user_token_extractor(request, Token)
 
@@ -416,19 +429,11 @@ def verify_payment(request):
         userid = {
             "user": str(user_token_extractor(request, Token))
         }
-        print("<<<<<<<<<>>>>>>>>>>>>>>>")
-        print(userid)
-
         user_request = request.data
-        print("<<<<<<<<<>>>>>>>>>>>>>>>")
-        print(user_request)
-
         users_request = {**user_request, **userid}
         print("<<<<<<<<<>>>>>>>>>>>>>>>")
         print(users_request)
         serializer = PaymentVerificationSerializer(data=users_request)
-        print("<<<<<<<<<>>>>>>>>>>>>>>>")
-        print(serializer)
 
         if serializer.is_valid():
             serializer.save()
@@ -447,3 +452,14 @@ def verify_payment(request):
 
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def account_balance(request):
+    if request.method == 'GET':
+        user = user_token_extractor(request, Token)
+
+        balance = Account_balanceSerializer.objects.filter(user=user)
+        serializer = Account_balanceSerializer(balance, many=True)
+        return Response(serializer.data)
