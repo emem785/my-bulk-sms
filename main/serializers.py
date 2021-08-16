@@ -39,9 +39,9 @@ class GroupSerializer(ModelSerializer):
         read_only_fields = ('id',)
 
 
-class TransactionSerializer(ModelSerializer):
+class PaymentTransactionSerializer(ModelSerializer):
     class Meta:
-        model = Transaction
+        model = PaymentTransaction
         fields = '__all__'
 
 
@@ -54,4 +54,16 @@ class SenderSerializer(ModelSerializer):
 class TemplateSerializer(ModelSerializer):
     class Meta:
         model = Template
+        fields = '__all__'
+
+
+class PaymentVerificationSerializer(ModelSerializer):
+    class Meta:
+        model = Payment_verification
+        fields = '__all__'
+
+
+class CreditCardDetailsSerializer(ModelSerializer):
+    class Meta:
+        model = Credit_card_details
         fields = '__all__'

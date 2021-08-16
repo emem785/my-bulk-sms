@@ -288,7 +288,7 @@ def contact_detail(request, pk, format=None):
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = GroupSerializer(contact, data=request.data)
+        serializer = ContactSerializer(contact, data=request.data)
         if serializer.is_valid():
 
             serializer.save()
@@ -341,11 +341,6 @@ def create_template(request):
         serializer = TemplateSerializer(template, many=True)
         return Response(serializer.data)
 
-    # elif request.method == 'GET':
-    #     customer = Customer.objects.all()
-    #     serializer = CustomerSerializer(customer, many=True)
-    #     return Response(serializer.data)
-
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes((IsAuthenticated,))
@@ -376,53 +371,79 @@ def template_detail(request, pk, format=None):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def view_transaction(request):
+    if request.method == 'GET':
+        user = user_token_extractor(request, Token)
+
+        transaction = Transaction.objects.filter(user=user)
+        serializer = TransactionSerializer(transaction, many=True)
+        return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def view_credit_card_details(request):
+    if request.method == 'GET':
+        user = user_token_extractor(request, Token)
+
+        credit_card_detail = Credit_card_details.objects.filter(user=user)
+        serializer = CreditCardDetailsSerializer(credit_card_detail, many=True)
+        return Response(serializer.data)
+
+
+@api_view(['DELETE'])
+@permission_classes((IsAuthenticated,))
+def creditCard_detail(request, pk, format=None):
+
+    user = user_token_extractor(request, Token)
+
+    try:
+        creditCardDetail = Credit_card_details.objects.get(pk=pk, user=user)
+    except Credit_card_details.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'DELETE':
+        creditCardDetail.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
-def create_transaction(request):
+def verify_payment(request):
     if request.method == 'POST':
-        serializer = TransactionSerializer(data=request.data)
+        userid = {
+            "user": str(user_token_extractor(request, Token))
+        }
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(userid)
+
+        user_request = request.data
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(user_request)
+
+        users_request = {**user_request, **userid}
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(users_request)
+        serializer = PaymentVerificationSerializer(data=users_request)
+        print("<<<<<<<<<>>>>>>>>>>>>>>>")
+        print(serializer)
 
         if serializer.is_valid():
             serializer.save()
-            message = {
-                "status": "Success"
-            }
+            user = users_request.get('user')
+            user_ref = user_request.get('user_ref')
+            reason = user_request.get('reason')
+            savecard = user_request.get('save_card')
+            response = Payment_verification.paystack_request(
+                user, user_ref, reason, savecard)
+
             print("[[[[[[[[[[[[[[[[[[[[[")
             print('..................')
-            print(message)
+            print(response)
 
-            return Response(data=message, status=HTTP_201_CREATED)
+            return Response(data=response, status=HTTP_201_CREATED)
 
         else:
             return Response(data=serializer.errors, status=HTTP_400_BAD_REQUEST)
-
-    # elif request.method == 'GET':
-    #     customer = Customer.objects.all()
-    #     serializer = CustomerSerializer(customer, many=True)
-    #     return Response(serializer.data)
-
-
-@api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes((IsAuthenticated,))
-def transaction_detail(request, pk, format=None):
-
-    try:
-        transaction = Transaction.objects.get(pk=pk)
-    except Group.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
-        serializer = GroupSerializer(transaction)
-        return Response(serializer.data)
-
-    elif request.method == 'PUT':
-        serializer = TransactionSerializer(transaction, data=request.data)
-        if serializer.is_valid():
-
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
-        transaction.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
