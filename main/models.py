@@ -85,6 +85,10 @@ class Balance(models.Model):
 
     @staticmethod
     def create_balance_first_time_user(user, unit, amount):
+        print('>>>>>>>>>account balance>>>>>>>>>')
+        print(user)
+        print(unit)
+        print(amount)
         first_time_user_balance = Balance(
             user=user,
             amount=amount,
@@ -132,10 +136,13 @@ class Payment_verification(models.Model):
             PaymentTransaction.create_transaction(user, transact.get(
                 'amount'), unit, transact.get('id'), reason, transact.get('reference'))
 
-            user = Balance.objects.filter(user=user)
-            # check if data do not exist for user
-            if user is None:
+            userBal = Balance.objects.filter(user=user)
 
+            # check if data do not exist for user
+            if not userBal.exists():
+
+                print("<<<<<<<<<Balance Model User>>>>>>>>>>>>>>>")
+                print(userBal.exists())
                 # create to balance table
                 Balance.create_balance_first_time_user(
                     user, unit, amount)

@@ -19,7 +19,7 @@ def user_token_extractor(request, Token):
 
 def paystack_payment_request(user_ref):
     base_url = f'https://api.paystack.co/transaction/verify/{user_ref}'
-    authorization = "Bearer sk_test_e6afc1fee39acefe9f16fa769cd5eaf62db7c21b"
+    authorization = "Bearer sk_test_42aad857a6cea5f78ed631260a1f75faafa930ae"
     headers = {
         'AUTHORIZATION': authorization
     }

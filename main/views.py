@@ -431,16 +431,16 @@ def verify_payment(request):
         }
         user_request = request.data
         users_request = {**user_request, **userid}
-        print("<<<<<<<<<>>>>>>>>>>>>>>>")
-        print(users_request)
         serializer = PaymentVerificationSerializer(data=users_request)
 
         if serializer.is_valid():
             serializer.save()
-            user = users_request.get('user')
-            user_ref = user_request.get('user_ref')
-            reason = user_request.get('reason')
-            savecard = user_request.get('save_card')
+            print("<<<<<<<<<>>>>>>>>>>>>>>>")
+            print(users_request)
+            user = serializer.validated_data.get('user')
+            user_ref = serializer.validated_data.get('payment_reference')
+            reason = serializer.validated_data.get('reason')
+            savecard = serializer.validated_data.get('save_card')
             response = Payment_verification.paystack_request(
                 user, user_ref, reason, savecard)
 
@@ -460,6 +460,6 @@ def account_balance(request):
     if request.method == 'GET':
         user = user_token_extractor(request, Token)
 
-        balance = Account_balanceSerializer.objects.filter(user=user)
+        balance = Balance.objects.filter(user=user)
         serializer = Account_balanceSerializer(balance, many=True)
         return Response(serializer.data)
