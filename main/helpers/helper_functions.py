@@ -33,3 +33,8 @@ def paystack_payment_request(user_ref):
 def unit_converter(amount):
     unit = float(amount) / 2.50
     return float(unit)
+
+
+def initial_bonus_sum(amount):
+    amount = float(amount) + 1000.00
+    return str(amount)

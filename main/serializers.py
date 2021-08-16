@@ -73,3 +73,9 @@ class CreditCardDetailsSerializer(ModelSerializer):
     class Meta:
         model = Credit_card_details
         fields = '__all__'
+
+
+class Account_balanceSerializer(ModelSerializer):
+    class Meta:
+        model = Balance
+        fields = '__all__'

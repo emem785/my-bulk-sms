@@ -16,7 +16,9 @@ urlpatterns = [
     path('contacts/', create_contacts),
     path('contact/<int:pk>', contact_detail),
     path('creditcard/', view_credit_card_details),
-    path('creditcard/<int:pk>', creditCard_detail),
-    path('transaction/', view_transaction),
-    path('verifyPayments/', verify_payment)
+    path('creditcard/<int:pk>', delete_creditCard),
+    path('transaction/<int:pk>', view_one_transaction),
+    path('transaction/', view_all_transaction),
+    path('verifyPayments/', verify_payment),
+    path('account_balance/', account_balance)
 ]
