@@ -9,8 +9,10 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 admin.site.register(Contact)
 admin.site.register(User)
 admin.site.register(Message)
-admin.site.register(Transaction)
+admin.site.register(PaymentTransaction)
+admin.site.register(Balance)
+admin.site.register(Payment_verification)
+admin.site.register(Credit_card_details)
 admin.site.register(Group)
 admin.site.register(Template)
 admin.site.register(Sender)
-

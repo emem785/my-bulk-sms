@@ -12,19 +12,22 @@ User = get_user_model()
 
 
 class UserCreateSerializer(UserCreateSerializer):
-    
+
     class Meta(UserCreateSerializer.Meta):
         model = User
         fields = '__all__'
-        
-
-
 
 
 class MessageSerializer(ModelSerializer):
     class Meta:
         model = Message
-        fields = ['content','sender_name']
+        fields = ['content', 'sender_name']
+
+
+class ContactSerializer(ModelSerializer):
+    class Meta:
+        model = Contact
+        fields = '__all__'
 
 
 class ContactSerializer(ModelSerializer):
@@ -44,7 +47,7 @@ class GroupSerializer(ModelSerializer):
 
 class TransactionSerializer(ModelSerializer):
     class Meta:
-        model = Transaction
+        model = PaymentTransaction
         fields = '__all__'
 
 
@@ -60,3 +63,13 @@ class TemplateSerializer(ModelSerializer):
         fields = '__all__'
 
 
+class PaymentVerificationSerializer(ModelSerializer):
+    class Meta:
+        model = Payment_verification
+        fields = '__all__'
+
+
+class CreditCardDetailsSerializer(ModelSerializer):
+    class Meta:
+        model = Credit_card_details
+        fields = '__all__'

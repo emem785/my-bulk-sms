@@ -77,11 +77,19 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Contact',
             fields=[
+<<<<<<< HEAD
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('mobile_numbers', models.TextField()),
                 ('first_name', models.CharField(max_length=100)),
                 ('last_name', models.CharField(max_length=100)),
                 ('group', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='contacts', to='main.Group')),
+=======
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('mobile_numbers', models.TextField()),
+                ('first_name', models.CharField(max_length=100)),
+                ('last_name', models.CharField(max_length=100)),
+                ('group', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='contacts', to='main.group')),
+>>>>>>> 104dbca0d1ff419d87ea8ed625f9430cc19aa1a8
             ],
         ),
         migrations.CreateModel(
