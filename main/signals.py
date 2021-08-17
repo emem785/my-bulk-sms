@@ -23,5 +23,5 @@ def create_group(sender, instance: PaymentTransaction, created, **kwargs):
         token = user.firebase_key
         data = {"reason": instance.reason, "amount": str(instance.amount)}
         cloud_messaging.send_broadcast(
-            token=token, title="Group", body="Group created", data=data)
+            token=token, title="Transaction", body="Transaction completed", data=data)
         print("transaction created")
