@@ -1,28 +1,31 @@
 
-from main.helpers.helper_functions import initial_bonus_sum, paystack_payment_request, unit_converter
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from main.helpers.helper_functions import (initial_bonus_sum,
+                                           paystack_payment_request,
+                                           unit_converter)
 from main.manager import UserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    first_name    = models.CharField(_('first name'),max_length = 250)
-    last_name    = models.CharField(_('last name'),max_length = 250)
-    email         = models.EmailField(_('email'), unique=True)
-    phone         = models.CharField(_('phone'), max_length = 20, unique = True)
-    address       = models.CharField(_('address'), max_length = 250, null = True)
-    password      = models.CharField(_('password'), max_length=300)
-    is_staff      = models.BooleanField(_('staff'), default=False)
-    is_admin      = models.BooleanField(_('admin'), default= False)
-    is_active     = models.BooleanField(_('active'), default=True)
-    date_joined   = models.DateTimeField(_('date joined'), auto_now_add=True)
-    firebase_key      = models.CharField(_('firebase_key'), max_length=300,default="FBK")
+    first_name = models.CharField(_('first name'), max_length=250)
+    last_name = models.CharField(_('last name'), max_length=250)
+    email = models.EmailField(_('email'), unique=True)
+    phone = models.CharField(_('phone'), max_length=20, unique=True)
+    address = models.CharField(_('address'), max_length=250, null=True)
+    password = models.CharField(_('password'), max_length=300)
+    is_staff = models.BooleanField(_('staff'), default=False)
+    is_admin = models.BooleanField(_('admin'), default=False)
+    is_active = models.BooleanField(_('active'), default=True)
+    date_joined = models.DateTimeField(_('date joined'), auto_now_add=True)
+    firebase_key = models.CharField(
+        _('firebase_key'), max_length=300, default="FBK")
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name','last_name','phone','firebase_key']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'phone', 'firebase_key']
 
     class Meta:
         verbose_name = _('user')
@@ -71,7 +74,8 @@ class Contact(models.Model):
     # customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     # contact = models.IntegerField() auto generated
     mobile_numbers = models.TextField()
-    group = models.ForeignKey(Group,on_delete=models.CASCADE,null=True,related_name="contacts")
+    group = models.ForeignKey(
+        Group, on_delete=models.CASCADE, null=True, related_name="contacts")
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
 
@@ -115,13 +119,24 @@ class Payment_verification(models.Model):
         if paystack_response.get("message") == "Verification successful":
             if savecard:
                 # save to credit card detail
+                
                 card = paystack_response.get('data').get('authorization')
-                Credit_card_details.create_credit_card(
-                    user, card.get('signature'), card.get(
-                        'bank'), card.get('account_name'), card.get('bin'),
-                    card.get('last4'), card.get('authorization_code'), card.get(
-                        'exp_month'), card.get('exp_year'), card.get('card_type'),
-                    card.get('channel'), card.get('country_code'), card.get('brand'))
+                card_exists = Credit_card_details.objects.filter(card_signature=card.get('signature')).exists()
+                if not card_exists:
+                    Credit_card_details.create_credit_card(
+                        user,
+                    card.get('signature'),
+                    card.get('account_name'),
+                    card.get('bank'),
+                    card.get('bin'),
+                    card.get('last4'),
+                    card.get('authorization_code'),
+                    card.get('exp_month'),
+                    card.get('exp_year'),
+                    card.get('card_type'),
+                    card.get('channel'),
+                    card.get('country_code'),
+                    card.get('brand'))
 
             # save to transaction table
             transact = paystack_response.get('data')
@@ -132,19 +147,17 @@ class Payment_verification(models.Model):
 
             user = Balance.objects.filter(user=user)
             # check if data do not exist for user
-            if user is None:
+            # if user is None:
 
-                # create to balance table
-                Balance.create_balance_first_time_user(
-                    user, unit, amount)
+            #     # create to balance table
+            #     Balance.create_balance_first_time_user(
+            #         user, unit, amount)
 
-            # otherwise update
-            else:
-                Balance.update_user_balance(user, unit, transact.get('amount'))
+            # # otherwise update
+            # else:
+            #     Balance.update_user_balance(user, unit, transact.get('amount'))
 
-            message = {
-                "status": "Payment successful"
-            }
+            message = {"status": "Payment successful"}
             return message
 
         else:
@@ -198,7 +211,7 @@ class Credit_card_details(models.Model):
     user = models.EmailField(max_length=150)
     card_signature = models.CharField(max_length=150)
     bank_name = models.CharField(max_length=100)
-    account_name = models.CharField(max_length=100)
+    account_name = models.CharField(max_length=100, default="Invalid",blank=True)
     bin = models.CharField(max_length=6)
     card_last_four_digit = models.CharField(max_length=4)
     authorization_code = models.CharField(max_length=100)
@@ -215,14 +228,16 @@ class Credit_card_details(models.Model):
         return str(self.id) and str(self.card_signature)
 
     @staticmethod
-    def create_credit_card(user, card_signature, bank_name, account_name, bin, card_last_four_digit, authorization_code,
-                           exp_month, exp_year, card_type, channel, country_code, brand):
+    def create_credit_card(user="null", card_signature="null", account_name="invalid", bank_name="null", bin="null", card_last_four_digit="null", authorization_code="null",
+                           exp_month="null", exp_year="null", card_type="null", channel="null", country_code="null", brand="null"):
+
+        print(user)
 
         new_credit_card = Credit_card_details(
             user=user,
             card_signature=card_signature,
             bank_name=bank_name,
-            account_name=account_name,
+            account_name="invalid" if account_name is None    else account_name,
             bin=bin,
             card_last_four_digit=card_last_four_digit,
             authorization_code=authorization_code,

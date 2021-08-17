@@ -468,10 +468,10 @@ def verify_payment(request):
 
         if serializer.is_valid():
             serializer.save()
-            user = users_request.get('user')
-            user_ref = user_request.get('user_ref')
-            reason = user_request.get('reason')
-            savecard = user_request.get('save_card')
+            user = serializer.validated_data['user']
+            user_ref = serializer.validated_data['payment_reference']
+            reason = serializer.validated_data['reason']
+            savecard = serializer.validated_data['save_card']
             response = Payment_verification.paystack_request(
                 user, user_ref, reason, savecard)
 
