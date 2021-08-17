@@ -1,4 +1,5 @@
 
+import json
 import os
 
 import firebase_admin
@@ -11,18 +12,20 @@ class CloudMessaging:
         cred = credentials.Certificate(path)
         firebase_admin.initialize_app(cred)
 
-    def send_broadcast(self, token, title, body):
+    def send_broadcast(self, token, title, body,data):
         # See documentation on defining a message payload.
+
 
         try:
             message = messaging.Message(
                 notification=messaging.Notification(
-                    title="Whisper Mobile",
-                    body="You have a notification"
+                    title=title,
+                    body=body,
                 ),
-                data={"title": title, "body": body},
+                data=data,
                 token=token,
             )
+
 
             # Send a message to the device corresponding to the provided
             # registration token.
