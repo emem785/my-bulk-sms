@@ -68,6 +68,11 @@ class PaymentVerificationSerializer(ModelSerializer):
         model = Payment_verification
         fields = '__all__'
 
+class PaymentTransactionSerializer(ModelSerializer):
+    class Meta:
+        model = PaymentTransaction
+        fields = '__all__'
+
 
 class CreditCardDetailsSerializer(ModelSerializer):
     class Meta:
