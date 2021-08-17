@@ -100,10 +100,11 @@ class Balance(models.Model):
         return first_time_user_balance
 
     @staticmethod
-    def update_user_balance(user, unit, amount):
-        balance = Balance.objects.filter(user=user)
-        updateBalance = balance.update(unit=unit, amount=amount)
-        updateBalance.save()
+    def update_user_balance(user_balance_query, unit, amount):
+        unitBal = float(user_balance_query[0].unit) + unit
+        amountBal = float(user_balance_query[0].amount) + amount
+        updateBalance = user_balance_query.update(
+            unit=unitBal, amount=amountBal)
 
         return updateBalance
 
@@ -149,7 +150,12 @@ class Payment_verification(models.Model):
 
             # otherwise update
             else:
-                Balance.update_user_balance(user, unit, transact.get('amount'))
+                print("<<<<<<<<<Balance Model User Update >>>>>>>>>>>>>>>")
+                print(userBal[0].unit)
+                print(unit)
+                print(amount)
+                Balance.update_user_balance(
+                    userBal, unit, transact.get('amount'))
 
             message = {
                 "status": "Payment successful"
