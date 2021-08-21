@@ -489,8 +489,14 @@ def verify_payment(request):
 @permission_classes((IsAuthenticated,))
 def account_balance(request):
     if request.method == 'GET':
-        user = user_token_extractor(request, Token)
+        
+        try:
+            user = user_token_extractor(request, Token)
 
-        balance = Account_balanceSerializer.objects.filter(user=user)
-        serializer = Account_balanceSerializer(balance, many=True)
-        return Response(serializer.data)
+            balance = Balance.objects.get(user=user)
+            print(balance)
+            serializer = Account_balanceSerializer(balance)
+            return Response(serializer.data)
+        except Balance.DoesNotExist:
+            return Response({"msg":"no balance"},status=status.HTTP_404_NOT_FOUND)
+

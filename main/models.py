@@ -119,24 +119,25 @@ class Payment_verification(models.Model):
         if paystack_response.get("message") == "Verification successful":
             if savecard:
                 # save to credit card detail
-                
+
                 card = paystack_response.get('data').get('authorization')
-                card_exists = Credit_card_details.objects.filter(card_signature=card.get('signature')).exists()
+                card_exists = Credit_card_details.objects.filter(
+                    card_signature=card.get('signature')).exists()
                 if not card_exists:
                     Credit_card_details.create_credit_card(
                         user,
-                    card.get('signature'),
-                    card.get('account_name'),
-                    card.get('bank'),
-                    card.get('bin'),
-                    card.get('last4'),
-                    card.get('authorization_code'),
-                    card.get('exp_month'),
-                    card.get('exp_year'),
-                    card.get('card_type'),
-                    card.get('channel'),
-                    card.get('country_code'),
-                    card.get('brand'))
+                        card.get('signature'),
+                        card.get('account_name'),
+                        card.get('bank'),
+                        card.get('bin'),
+                        card.get('last4'),
+                        card.get('authorization_code'),
+                        card.get('exp_month'),
+                        card.get('exp_year'),
+                        card.get('card_type'),
+                        card.get('channel'),
+                        card.get('country_code'),
+                        card.get('brand'))
 
             # save to transaction table
             transact = paystack_response.get('data')
@@ -145,17 +146,14 @@ class Payment_verification(models.Model):
             PaymentTransaction.create_transaction(user, transact.get(
                 'amount'), unit, transact.get('id'), reason, transact.get('reference'))
 
-            user = Balance.objects.filter(user=user)
-            # check if data do not exist for user
-            # if user is None:
+            try:
+                userBal = Balance.objects.get(user=user)
+                Balance.update_user_balance(
+                    userBal, unit, transact.get('amount'))
 
-            #     # create to balance table
-            #     Balance.create_balance_first_time_user(
-            #         user, unit, amount)
-
-            # # otherwise update
-            # else:
-            #     Balance.update_user_balance(user, unit, transact.get('amount'))
+            except Balance.DoesNotExist:
+                Balance.create_balance_first_time_user(
+                    user, unit, amount)
 
             message = {"status": "Payment successful"}
             return message
@@ -211,7 +209,8 @@ class Credit_card_details(models.Model):
     user = models.EmailField(max_length=150)
     card_signature = models.CharField(max_length=150)
     bank_name = models.CharField(max_length=100)
-    account_name = models.CharField(max_length=100, default="Invalid",blank=True)
+    account_name = models.CharField(
+        max_length=100, default="Invalid", blank=True)
     bin = models.CharField(max_length=6)
     card_last_four_digit = models.CharField(max_length=4)
     authorization_code = models.CharField(max_length=100)
@@ -237,7 +236,7 @@ class Credit_card_details(models.Model):
             user=user,
             card_signature=card_signature,
             bank_name=bank_name,
-            account_name="invalid" if account_name is None    else account_name,
+            account_name="invalid" if account_name is None else account_name,
             bin=bin,
             card_last_four_digit=card_last_four_digit,
             authorization_code=authorization_code,
