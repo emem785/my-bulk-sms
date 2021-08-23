@@ -156,13 +156,11 @@ class Payment_verification(models.Model):
             # check if data do not exist for user
             if not userBal.exists():
 
-            except Balance.DoesNotExist:
                 Balance.create_balance_first_time_user(
                     user, unit, amount)
 
             # otherwise update
             else:
-                print("<<<<<<<<<Balance Model User Update >>>>>>>>>>>>>>>")
                 print(userBal[0].unit)
                 print(unit)
                 print(amount)
