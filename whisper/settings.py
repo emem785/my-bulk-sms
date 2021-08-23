@@ -43,7 +43,9 @@ SECRET_KEY = "django-insecure-&j%h0#v$qs=%iy53vj2&*af*_1x(=g59b%8f!&e9c^&r7p9tx_
 DEBUG = True
 
 ALLOWED_HOSTS = [
-'emme785.pythonanywhere.com'
+'emme785.pythonanywhere.com',
+'*',
+'127.0.0.1'
 ]
 
 
@@ -128,14 +130,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 
-DATABASES = {
+DATABASES = DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': env('DATABASE_NAME'),
-        'USER': env('DATABASE_USER'),
-        'PASSWORD': env('DATABASE_PASS'),
-        'HOST': env('DATABASE_HOST'),
-        'PORT': '',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': str(os.path.join(BASE_DIR, "db.sqlite3")),
     }
 }
 
