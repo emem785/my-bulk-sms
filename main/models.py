@@ -101,7 +101,6 @@ class Balance(models.Model):
     def update_user_balance(user, unit, amount):
         balance = Balance.objects.filter(user=user)
         updateBalance = balance.update(unit=unit, amount=amount)
-        updateBalance.save()
 
         return updateBalance
 
