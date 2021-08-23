@@ -460,8 +460,6 @@ def verify_payment(request):
         print(user_request)
 
         users_request = {**user_request, **userid}
-        print("<<<<<<<<<>>>>>>>>>>>>>>>")
-        print(users_request)
         serializer = PaymentVerificationSerializer(data=users_request)
         print("<<<<<<<<<>>>>>>>>>>>>>>>")
         print(serializer)

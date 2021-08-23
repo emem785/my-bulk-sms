@@ -87,6 +87,10 @@ class Balance(models.Model):
 
     @staticmethod
     def create_balance_first_time_user(user, unit, amount):
+        print('>>>>>>>>>account balance>>>>>>>>>')
+        print(user)
+        print(unit)
+        print(amount)
         first_time_user_balance = Balance(
             user=user,
             amount=amount,
@@ -98,9 +102,11 @@ class Balance(models.Model):
         return first_time_user_balance
 
     @staticmethod
-    def update_user_balance(user, unit, amount):
-        balance = Balance.objects.filter(user=user)
-        updateBalance = balance.update(unit=unit, amount=amount)
+    def update_user_balance(user_balance_query, unit, amount):
+        unitBal = float(user_balance_query[0].unit) + unit
+        amountBal = float(user_balance_query[0].amount) + amount
+        updateBalance = user_balance_query.update(
+            unit=unitBal, amount=amountBal)
 
         return updateBalance
 
@@ -145,16 +151,27 @@ class Payment_verification(models.Model):
             PaymentTransaction.create_transaction(user, transact.get(
                 'amount'), unit, transact.get('id'), reason, transact.get('reference'))
 
-            try:
-                userBal = Balance.objects.get(user=user)
-                Balance.update_user_balance(
-                    userBal, unit, transact.get('amount'))
+            userBal = Balance.objects.filter(user=user)
+
+            # check if data do not exist for user
+            if not userBal.exists():
 
             except Balance.DoesNotExist:
                 Balance.create_balance_first_time_user(
                     user, unit, amount)
 
-            message = {"status": "Payment successful"}
+            # otherwise update
+            else:
+                print("<<<<<<<<<Balance Model User Update >>>>>>>>>>>>>>>")
+                print(userBal[0].unit)
+                print(unit)
+                print(amount)
+                Balance.update_user_balance(
+                    userBal, unit, transact.get('amount'))
+
+            message = {
+                "status": "Payment successful"
+            }
             return message
 
         else:
