@@ -30,8 +30,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 cloud_messaging = CloudMessaging(BASE_DIR)
 
 
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -43,9 +41,9 @@ SECRET_KEY = "django-insecure-&j%h0#v$qs=%iy53vj2&*af*_1x(=g59b%8f!&e9c^&r7p9tx_
 DEBUG = True
 
 ALLOWED_HOSTS = [
-'emme785.pythonanywhere.com',
-'*',
-'127.0.0.1'
+    'emme785.pythonanywhere.com',
+    '*',
+    '127.0.0.1'
 ]
 
 
@@ -63,17 +61,20 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     # api
     'rest_framework',
-    
-    #auth
+
+    # auth
     'djoser',
 
     # docs
     'drf_yasg',
-    'coreapi'
+    'coreapi',
+    'corsheaders',
 ]
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -119,8 +120,8 @@ EMAIL_HOST = 'smtp.gmail.com'
 # EMAIL_HOST = 'smtp.mailgun.org'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER= 'emmanuelisong1@gmail.com'
-EMAIL_HOST_PASSWORD='xeqaykkgquhhcjbj'
+EMAIL_HOST_USER = 'emmanuelisong1@gmail.com'
+EMAIL_HOST_PASSWORD = 'xeqaykkgquhhcjbj'
 # EMAIL_HOST_USER= 'postmaster@sandbox3db2b50692844e79adba44b259fcd74d.mailgun.org'
 # EMAIL_HOST_PASSWORD='382623e5357749674e36929a3eae6fee-64574a68-61f182d1'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -206,6 +207,6 @@ DJOSER = {
         'user': 'main.serializers.UserCreateSerializer',
         'user_delete': 'djoser.serializers.UserDeleteSerializer'
     }
-     
-    
+
+
 }
